@@ -1,6 +1,9 @@
 from fastapi import FastAPI
+from models import criar_tabelas
 
 app = FastAPI()
+
+criar_tabelas()
 
 @app.get("/")
 def raiz():

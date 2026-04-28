@@ -11,5 +11,3 @@ app.include_router(produtos.router)
 @app.get("/")
 def raiz():
     return {"mensagem": "Olá Mundo!"}
-
-#uvicorn main:app <- Rodar o servidor de desenvolvimento

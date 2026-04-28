@@ -11,6 +11,9 @@ class ProdutoEntrada(BaseModel):
     quantidade_minima: int
     categoria: str
 
+class AtualizarQuantidadeProduto(BaseModel):
+    quantidade: int
+
 
 @router.get("/produtos")
 def listar_produtos():
@@ -73,6 +76,20 @@ def buscar_produto(id: int):
     }
 
 @router.put("/produtos/{id}/quantidade")
-def atualizar_quantidade(id:int, dados:dict):
+def atualizar_quantidade(id: int, dados: AtualizarQuantidadeProduto):
     conn = get_conn()
     cursor = conn.cursor()
+    cursor.execute("SELECT id FROM produtos WHERE id = %s", (id,))
+    produto = cursor.fetchone()
+
+    if not produto:
+        cursor.close()
+        conn.close()
+        return {"Mensagem": "Produto não encontrado"}
+
+    cursor.execute("UPDATE produtos SET quantidade = %s WHERE id = %s", (dados.quantidade, id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    return {"Mensagem": "Quantidade atualizada com sucesso"}

@@ -18,7 +18,7 @@ def listar_usuarios():
     usuarios = cursor.fetchall()
     cursor.close()
     conn.close()
-    return{
+    return[
         {
             "id": usuarios [0],
             "nome": usuarios [1],
@@ -26,7 +26,7 @@ def listar_usuarios():
             "perfil": usuarios [3]
         }
         for usuarios in usuarios
-    }
+    ]
 
 @router.post("/usuarios")
 def criar_usuario(usuario: UsuarioEntrada):
@@ -40,13 +40,14 @@ def criar_usuario(usuario: UsuarioEntrada):
                        usuario.perfil
                    ))
     novo_id = cursor.fetchone()[0]
+    conn.commit()
     cursor.close()
     conn.close()
     return{"Mensagem": "Usuário criado com sucesso", "id": novo_id}
 
 @router.put("/usuarios/{id}")
 def atualizar_usuario(id: int, usuario: UsuarioEntrada):
-    conn = get_con()
+    conn = get_conn()
     cursor = conn.cursor()
     cursor.execute("SELECT id FROM usuarios WHERE id = %s", (id,))
     usuario_existente = cursor.fetchone()
@@ -63,6 +64,7 @@ def atualizar_usuario(id: int, usuario: UsuarioEntrada):
         usuario.perfil,
         id
     ))
+    conn.commit()
     cursor.close()
     conn.close()
     return {"Mensagem": "Usuário atualizado com sucesso"}

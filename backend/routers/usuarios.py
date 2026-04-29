@@ -1,14 +1,22 @@
 from fastapi import APIRouter
 from database import get_conn
 from pydantic import BaseModel
+from enum import Enum
 
 router = APIRouter()
+
+class PerfilUsuario(str, Enum):
+    solicitante = "Solicitante"
+    estoquista = "Estoquista"
+    gerente = "Gerente"
+    administrador = "Administrador"
+
 
 class UsuarioEntrada(BaseModel):
     nome: str
     email: str
     senha: str
-    perfil: str
+    perfil: PerfilUsuario
 
 @router.get("/usuarios")
 def listar_usuarios():

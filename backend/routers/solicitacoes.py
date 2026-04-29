@@ -21,14 +21,14 @@ def listar_solicitacoes():
     conn.close()
     return [
         {
-            "id": solicitacoes [0],
-            "usuario_id": solicitacoes [1],
-            "produto_id": solicitacoes [2],
-            "quantidade": solicitacoes [3],
-            "motivo": solicitacoes [4],
-            "status": solicitacoes [5]
+            "id": s[0],
+            "usuario_id": s[1],
+            "produto_id": s[2],
+            "quantidade": s[3],
+            "motivo": s[4],
+            "status": s[5]
         }
-        for solicitacoes in solicitacoes
+        for s in solicitacoes
     ]
 
 @router.post("/solicitacoes")

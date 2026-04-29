@@ -20,12 +20,12 @@ def listar_usuarios():
     conn.close()
     return[
         {
-            "id": usuarios [0],
-            "nome": usuarios [1],
-            "email": usuarios [2],
-            "perfil": usuarios [3]
+            "id": u[0],
+            "nome": u[1],
+            "email": u[2],
+            "perfil": u[3]
         }
-        for usuarios in usuarios
+        for u in usuarios
     ]
 
 @router.post("/usuarios")

@@ -25,14 +25,14 @@ def listar_produtos():
     conn.close()
     return [
         {
-            "id": produtos[0],
-            "nome": produtos[1],
-            "sku": produtos[2],
-            "quantidade": produtos[3],
-            "quantidade_minima": produtos[4],
-            "categoria": produtos[5]
+            "id": p[0],
+            "nome": p[1],
+            "sku": p[2],
+            "quantidade": p[3],
+            "quantidade_minima": p[4],
+            "categoria": p[5]
         }
-        for produtos in produtos
+        for p in produtos
     ]
 
 @router.post("/produtos")

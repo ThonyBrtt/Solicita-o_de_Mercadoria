@@ -53,7 +53,6 @@ def criar_produto(produto: ProdutoEntrada):
     conn.close()
     return{"mensagem": "Produto criado com sucesso", "id": novo_id}
 
-
 @router.get("/produtos/{id}")
 def buscar_produto(id: int):
     conn = get_conn()

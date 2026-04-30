@@ -11,15 +11,23 @@ class SolicitacaoEntrada(BaseModel):
     motivo:str
     prioridade: str
 
+class AtualizarStatus(BaseModel):
+    status: str
+
 @router.get("/solicitacoes")
-def listar_solicitacoes():
+def listar_solicitacoes(status: str = None):
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status FROM solicitacoes")
+
+    if status:
+        cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status FROM solicitacoes WHERE status = %s", (status,))
+    else:
+        cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status FROM solicitacoes")
+    
     solicitacoes = cursor.fetchall()
     cursor.close()
     conn.close()
-    return [
+    return[
         {
             "id": s[0],
             "usuario_id": s[1],
@@ -30,6 +38,27 @@ def listar_solicitacoes():
         }
         for s in solicitacoes
     ]
+
+@router.get("/soliciitacoes/{id}")
+def buscar_solicitacao(id:int):
+    conn = get_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status FROM solicitacoes WHERE id = %s", (id,))
+    solicitacao = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if not solicitacao:
+        return {"mensagem": "Solicitação não encontrada"}
+    
+    return {
+        "id": solicitacao[0],
+        "usuario_id": solicitacao[1],
+        "produto_id": solicitacao[2],
+        "quantidade": solicitacao[3],
+        "motivo": solicitacao[4],
+        "status": solicitacao[5]
+    }
 
 @router.post("/solicitacoes")
 def criar_solicitacao(solicitacao: SolicitacaoEntrada):
@@ -84,4 +113,22 @@ def atualizar_solicitacoes( id:int, solicitacao: SolicitacaoEntrada):
     conn.commit()
     cursor.close()
     conn.close()
-    return {"Mensagem": "Solicitação atualizada com sucesso"}
+    return {"Mensagem": "Solicitação atualizada com sucesso!"}
+
+@router.patch("/Solicitacoes/{id}/status")
+def atualizar_status(id:int, status: AtualizarStatus):
+    conn = get_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM solicitacoes WHERE id = %s", (id,))
+    solicitacao = cursor.fetchone()
+
+    if not solicitacao:
+        cursor.close()
+        conn.close()
+        return {"Mensagem": "Solicitação não encontrada"}
+    
+    cursor.execute("UPDATE solicitacoes SET status = %s WHERE id = %s",(status.status, id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"Mensagem": "Status atualizado com sucesso!"}

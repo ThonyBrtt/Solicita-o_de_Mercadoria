@@ -11,7 +11,6 @@ class PerfilUsuario(str, Enum):
     gerente = "Gerente"
     administrador = "Administrador"
 
-
 class UsuarioEntrada(BaseModel):
     nome: str
     email: str

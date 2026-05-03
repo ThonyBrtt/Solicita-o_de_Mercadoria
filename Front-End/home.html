@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Revest Bem - Solicitação</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="Css/home.css" rel="stylesheet" />
+  <link rel="icon" href="Imagens/Revestico.ico" type="image/x-icon">   
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="#">
+        <img src="Imagens/Logo.png" width="40" height="40" class="me-2" alt="Logo">
+        Revest Bem
+      </a>
+      <div class="navbar-nav ms-auto">
+        <span class="navbar-text me-3" id="usuarioNome">Vendedor</span>
+        <button class="btn btn-outline-light btn-sm" onclick="logout()">Sair</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <!-- HEADER -->
+    <div class="row mb-4">
+      <div class="col">
+        <h2 class="fw-bold text-dark mb-1">Nova Solicitação</h2>
+        <small class="text-muted">Preencha os dados abaixo</small>
+      </div>
+    </div>
+
+    <!-- FORM SOLICITAÇÃO -->
+    <form id="formSolicitacao">
+      <!-- DADOS SOLICITANTE -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Vendedor</label>
+          <input type="text" class="form-control" id="vendedorNome" readonly>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Loja</label>
+          <select class="form-select" id="loja">
+            <option>Loja 01 - Matriz</option>
+            <option>Loja 02 - Centro</option>
+            <option>Loja 03 - Norte</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- BUSCA PRODUTO -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="input-group">
+            <input type="text" class="form-control" id="buscaProduto" 
+                   placeholder="Digite SKU ou nome do produto..." 
+                   onkeyup="buscarProduto()">
+            <button class="btn btn-outline-secondary" type="button" onclick="buscarProduto()">
+              🔍 Buscar
+            </button>
+          </div>
+          
+          <!-- RESULTADO BUSCA -->
+          <div id="resultadoBusca" class="mt-3"></div>
+        </div>
+      </div>
+
+      <!-- ITENS SOLICITADOS -->
+      <div class="card mb-4">
+        <div class="card-header bg-light">
+          <h6 class="mb-0 fw-semibold">Itens Solicitados <span id="totalItens" class="badge bg-primary ms-2">0</span></h6>
+        </div>
+        <div class="card-body p-0">
+          <div id="listaItens" class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>SKU</th>
+                  <th>Produto</th>
+                  <th>Estoque</th>
+                  <th>Qtd</th>
+                  <th>Valor</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="itensTabela">
+                <!-- ITENS SERÃO ADICIONADOS AQUI -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MOTIVO E PRIORIDADE -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Motivo *</label>
+          <select class="form-select" id="motivo" required>
+            <option value="">Selecione...</option>
+            <option value="venda-balcão">Venda Balcão (🔴 Prioridade)</option>
+            <option value="venda-entrega">Venda Entrega (🟡 Média)</option>
+            <option value="reposicao">Reposição (⚪ Baixa)</option>
+            <option value="consumo">Consumo Interno</option>
+            <option value="avaria">Avaria/Troca</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Observações</label>
+          <textarea class="form-control" id="observacoes" rows="2" placeholder="Detalhes adicionais..."></textarea>
+        </div>
+      </div>
+
+      <!-- BOTÕES -->
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button type="button" class="btn btn-outline-secondary me-md-2" onclick="limparFormulario()">
+          Limpar
+        </button>
+        <button type="submit" class="btn btn-primary" id="btnEnviar">
+          Enviar Solicitação
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script src="sistema.js"></script>
+</body>
+</html>

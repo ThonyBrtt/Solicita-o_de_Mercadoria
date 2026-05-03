@@ -1,0 +1,130 @@
+/* CSS SIMPLES REVEST BEM - FUNCIONAL */
+
+/* CORES BÁSICAS */
+:root {
+  --bg-principal: linear-gradient(135deg, #f5f2e9 0%, #d9c9a2 100%);
+  --card-bg: #ffffff;
+  --texto: #1a1a1a;
+  --borda: #d9c9a2;
+  --botao-bg: #d4af37;
+}
+
+/* BODY */
+body {
+  background: var(--bg-principal);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+/* FORMULÁRIO */
+.form-signin {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 30px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border: 1px solid var(--borda);
+}
+
+/* LOGO */
+.form-signin img {
+  display: block;
+  margin: 0 auto 20px;
+  border-radius: 12px;
+  border: 2px solid var(--borda);
+}
+
+/* TÍTULOS */
+.form-signin h1 {
+  color: var(--texto);
+  text-align: center;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.form-signin p {
+  text-align: center;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+/* INPUTS */
+.form-control {
+  border: 2px solid #e0e0e0 !important;
+  border-radius: 8px !important;
+  padding: 12px 15px !important;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.form-control:focus {
+  border-color: var(--botao-bg) !important;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1) !important;
+}
+
+/* LABELS */
+.form-floating > label {
+  color: #666;
+  font-weight: 500;
+}
+
+/* CHECKBOX */
+.form-check-input {
+  border: 2px solid var(--borda);
+}
+
+.form-check-input:checked {
+  background-color: var(--botao-bg);
+  border-color: var(--botao-bg);
+}
+
+/* BOTÃO */
+.btn-primary {
+  background: var(--botao-bg) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 12px 30px !important;
+  font-weight: 600;
+  font-size: 16px;
+  width: 100%;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-primary:hover {
+  background: #b8942e !important;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+}
+
+/* LINKS */
+.text-muted a {
+  color: var(--botao-bg) !important;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.text-muted a:hover {
+  text-decoration: underline;
+}
+
+/* RODAPÉ */
+.text-body-secondary {
+  color: #888 !important;
+  font-size: 14px;
+}
+
+/* RESPONSIVO */
+@media (max-width: 576px) {
+  .form-signin {
+    margin: 20px;
+    padding: 20px;
+  }
+  
+  .form-signin img {
+    width: 80px;
+    height: 80px;
+  }
+}

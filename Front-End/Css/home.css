@@ -1,0 +1,7 @@
+body { background: linear-gradient(135deg, #f5f2e9 0%, #d9c9a2 100%); }
+.navbar-brand img { border-radius: 50%; }
+.form-control:focus { border-color: #d4af37; box-shadow: 0 0 0 0.2rem rgba(212,175,55,.25); }
+.btn-primary { background: #d4af37; border-color: #d4af37; }
+.btn-primary:hover { background: #b8942e; }
+.list-group-item:hover { background: #f8f9fa; }
+.table th { border-top: none; }

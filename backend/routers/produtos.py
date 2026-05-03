@@ -10,6 +10,7 @@ class ProdutoEntrada(BaseModel):
     quantidade: int
     quantidade_minima: int
     categoria: str
+    lote: int
 
 class AtualizarQuantidadeProduto(BaseModel):
     quantidade: int
@@ -19,7 +20,7 @@ class AtualizarQuantidadeProduto(BaseModel):
 def listar_produtos():
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, nome, sku, quantidade, quantidade_minima, categoria FROM produtos")
+    cursor.execute("SELECT id, nome, sku, quantidade, quantidade_minima, categoria, lote FROM produtos")
     produtos = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -30,7 +31,8 @@ def listar_produtos():
             "sku": p[2],
             "quantidade": p[3],
             "quantidade_minima": p[4],
-            "categoria": p[5]
+            "categoria": p[5],
+            "lote": p[6]
         }
         for p in produtos
     ]
@@ -39,13 +41,14 @@ def listar_produtos():
 def criar_produto(produto: ProdutoEntrada):
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("""INSERT INTO produtos (nome, sku, quantidade, quantidade_minima, categoria)
-                   VALUES (%s, %s, %s, %s, %s) RETURNING id""",(
+    cursor.execute("""INSERT INTO produtos (nome, sku, quantidade, quantidade_minima, categoria, lote)
+                   VALUES (%s, %s, %s, %s, %s, %s) RETURNING id""",(
                        produto.nome,
                        produto.sku,
                        produto.quantidade,
                        produto.quantidade_minima,
-                       produto.categoria
+                       produto.categoria,
+                       produto.lote
                    ))
     novo_id = cursor.fetchone()[0]
     conn.commit()
@@ -57,7 +60,7 @@ def criar_produto(produto: ProdutoEntrada):
 def buscar_produto(id: int):
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, nome, sku, quantidade, quantidade_minima, categoria FROM produtos WHERE id = %s", (id,))
+    cursor.execute("SELECT id, nome, sku, quantidade, quantidade_minima, categoria, lote FROM produtos WHERE id = %s", (id,))
     produto = cursor.fetchone()
     cursor.close()
     conn.close()
@@ -71,7 +74,8 @@ def buscar_produto(id: int):
         "sku": produto[2],
         "quantidade": produto[3],
         "quantidade_minima": produto[4],
-        "categoria": produto[5]
+        "categoria": produto[5],
+        "lote": produto[6]
     }
 
 @router.put("/produtos/{id}/quantidade")

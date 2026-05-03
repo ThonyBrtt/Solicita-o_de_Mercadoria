@@ -6,14 +6,13 @@ from enum import Enum
 router = APIRouter()
 
 class PerfilUsuario(str, Enum):
-    solicitante = "Solicitante"
-    estoquista = "Estoquista"
-    gerente = "Gerente"
+    logistica = "logistica"
+    vendas  = "vendas"
     administrador = "Administrador"
 
 class UsuarioEntrada(BaseModel):
     nome: str
-    email: str
+    usuario: str
     senha: str
     perfil: PerfilUsuario
 
@@ -21,7 +20,7 @@ class UsuarioEntrada(BaseModel):
 def listar_usuarios():
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, nome, email, perfil FROM usuarios")
+    cursor.execute("SELECT id, nome, usuario, perfil FROM usuarios")
     usuarios = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -29,7 +28,7 @@ def listar_usuarios():
         {
             "id": u[0],
             "nome": u[1],
-            "email": u[2],
+            "usuario": u[2],
             "perfil": u[3]
         }
         for u in usuarios
@@ -39,10 +38,10 @@ def listar_usuarios():
 def criar_usuario(usuario: UsuarioEntrada):
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("""INSERT INTO usuarios (nome, email, senha, perfil) 
+    cursor.execute("""INSERT INTO usuarios (nome, usuario, senha, perfil) 
                    VALUES (%s, %s, %s, %s) RETURNING id""",(
                        usuario.nome,
-                       usuario.email,
+                       usuario.usuario,
                        usuario.senha,
                        usuario.perfil
                    ))
@@ -64,9 +63,9 @@ def atualizar_usuario(id: int, usuario: UsuarioEntrada):
         conn.close()
         return {"Mensagem": "Usuário Não encontrado"}
     
-    cursor.execute("UPDATE usuarios SET nome = %s, email = %s, senha = %s, perfil = %s WHERE id = %s", (
+    cursor.execute("UPDATE usuarios SET nome = %s, usuario = %s, senha = %s, perfil = %s WHERE id = %s", (
         usuario.nome,
-        usuario.email,
+        usuario.usuario,
         usuario.senha,
         usuario.perfil,
         id

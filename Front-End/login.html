@@ -36,25 +36,6 @@
           </div>
         </div>
 
-        async function handleLogin(e){
-          e.preventDefault();
-
-          const usuario = document.getElementById("usuario").value;
-          const senha = document.getElementById("senha").value;
-
-          const resposta = await fetch("http://127.0.0.1:8000/docs#/default/login_usuarios_get",{
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              usuario,
-              senha
-            });
-            const dados = await resposta.json();
-          })
-        }
-
         <form onsubmit="handleLogin(event)">
 
           <!-- USUÁRIO -->
@@ -127,18 +108,28 @@
       }
     }
 
-    function handleLogin(e) {
-      e.preventDefault();
-      // Lembrar login
-      const lembrar  = document.getElementById('lembrar').checked;
-      const usuario  = document.getElementById('usuario').value;
-      if (lembrar) {
-        localStorage.setItem('rb_usuario', usuario);
-      } else {
-        localStorage.removeItem('rb_usuario');
-      }
-      window.location.href = 'home.html';
+    async function handleLogin(e){
+    e.preventDefault();
+    
+    const usuario = document.getElementById("usuario").value;
+    const senha = document.getElementById("senha").value;
+
+    const resposta = await fetch("http://localhost:8000/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({usuario, senha})
+    });
+
+    const dados = await resposta.json();
+
+    if (dados.erro){
+        alert(dados.erro);
+        return;
     }
+
+    localStorage.setItem("usuario", JSON.stringify(dados));
+    window.location.href = "home.html";
+}
 
     // Preenche usuário salvo
     window.addEventListener('DOMContentLoaded', () => {

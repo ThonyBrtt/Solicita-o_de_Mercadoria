@@ -24,7 +24,7 @@ class LoginEntrada(BaseModel):
 def listar_usuarios():
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, nome, usuario, perfil FROM usuarios")
+    cursor.execute("SELECT id, nome, usuario, perfil, senha FROM usuarios")
     usuarios = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -33,7 +33,8 @@ def listar_usuarios():
             "id": u[0],
             "nome": u[1],
             "usuario": u[2],
-            "perfil": u[3]
+            "perfil": u[3],
+            "senha": u[4]
         }
         for u in usuarios
     ]
@@ -80,25 +81,26 @@ def atualizar_usuario(id: int, usuario: UsuarioEntrada):
     return {"Mensagem": "Usuário atualizado com sucesso"}
 
 
-@router.get("/usuarios")
+@router.post("/login")
 def login(dados: LoginEntrada):
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, nome, usuario, perfil FROM usuarios WHERE usuario = %s AND senha = %s",
-                   (dados.usuario, dados.senha
-    ))
-    usuarios = cursor.fetchall()
+    
+    cursor.execute(
+        "SELECT id, nome, usuario, perfil FROM usuarios WHERE usuario = %s AND senha = %s",
+        (dados.usuario, dados.senha)
+    )
+    usuario = cursor.fetchone()
+    
     cursor.close()
     conn.close()
-
-    if not usuarios:
-        return{"Mensagem":  "Usuario não encontrado"}
     
-    return{
-        "id": usuarios[0],
-        "nome": usuarios[1],
-        "usuario": usuarios[2],
-        "perfil": usuarios[3]
+    if not usuario:
+        return {"erro": "Usuário ou senha incorretos"}
+    
+    return {
+        "id": usuario[0],
+        "nome": usuario[1],
+        "usuario": usuario[2],
+        "perfil": usuario[3]
     }
-
-    

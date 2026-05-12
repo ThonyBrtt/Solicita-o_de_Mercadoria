@@ -16,6 +16,10 @@ class UsuarioEntrada(BaseModel):
     senha: str
     perfil: PerfilUsuario
 
+class LoginEntrada(BaseModel):
+    usuario: str
+    senha: str
+
 @router.get("/usuarios")
 def listar_usuarios():
     conn = get_conn()
@@ -74,3 +78,27 @@ def atualizar_usuario(id: int, usuario: UsuarioEntrada):
     cursor.close()
     conn.close()
     return {"Mensagem": "Usuário atualizado com sucesso"}
+
+
+@router.get("/usuarios")
+def login(dados: LoginEntrada):
+    conn = get_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, nome, usuario, perfil FROM usuarios WHERE usuario = %s AND senha = %s",
+                   (dados.usuario, dados.senha
+    ))
+    usuarios = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    if not usuarios:
+        return{"Mensagem":  "Usuario não encontrado"}
+    
+    return{
+        "id": usuarios[0],
+        "nome": usuarios[1],
+        "usuario": usuarios[2],
+        "perfil": usuarios[3]
+    }
+
+    

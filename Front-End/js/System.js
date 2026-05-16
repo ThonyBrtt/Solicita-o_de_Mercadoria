@@ -3,12 +3,26 @@ const API = "http://localhost:8000";
 let itens = [];
 
 async function buscarProduto() {
-    const termo = document.getElementById("buscaProduto").value.toLowerCase();
+    const termo = document.getElementById("buscaProduto").value.trim().toLowerCase();
     const categoria = document.getElementById("categoria").value;
+
+    if (!termo) return;
 
     const resposta = await fetch(`${API}/produtos`);
     const produtos = await resposta.json();
 
+    const exato = produtos.find(p =>
+        p.nome.toLowerCase() === termo || p.sku.toLowerCase() === termo
+    );
+
+    if (exato) {
+        adicionarItem(exato.id, exato.nome, exato.sku, exato.categoria, exato.quantidade);
+        document.getElementById("buscaProduto").value = "";
+        document.getElementById("resultadoBusca").innerHTML = "";
+        return;
+    }
+
+    // Se não achou exato, mostra resultado filtrado abaixo
     const filtrados = produtos.filter(p => {
         const nomeOk = p.nome.toLowerCase().includes(termo);
         const skuOk = p.sku.toLowerCase().includes(termo);
@@ -16,35 +30,60 @@ async function buscarProduto() {
         return (nomeOk || skuOk) && catOk;
     });
 
-    const resultado = document.getElementById("resultadoBusca");
-    resultado.innerHTML = filtrados.map(p => `
-        <div>
-            <strong>${p.nome}</strong> - SKU ${p.sku} - Estoque: ${p.quantidade}
-            <button onclick="adicionarItem(${p.id}, '${p.nome}', '${p.sku}', '${p.categoria}', ${p.quantidade})">
+    document.getElementById("resultadoBusca").innerHTML = filtrados.map(p => `
+        <div class="produto-item">
+            <div class="produto-info">
+                <div class="produto-sku">${p.sku}</div>
+                <div class="produto-nome">${p.nome}</div>
+                <div class="produto-cat">${p.categoria} — Estoque: ${p.quantidade}</div>
+            </div>
+            <button class="btn-add" onclick="adicionarItem(${p.id}, '${p.nome}', '${p.sku}', '${p.categoria}', ${p.quantidade})">
                 + Adicionar
             </button>
         </div>
     `).join("");
 }
 
-    function adicionarItem(id, nome, sku, categoria, estoque) {
+function adicionarItem(id, nome, sku, categoria, estoque) {
     const jaExiste = itens.find(i => i.produto_id === id);
-    
+
     if (jaExiste) {
-        alert("Produto já adicionado!");
+        showToast("Produto já adicionado!", "erro");
         return;
     }
 
-    itens.push({
-        produto_id: id,
-        nome: nome,
-        sku: sku,
-        categoria: categoria,
-        estoque: estoque,
-        quantidade: 1
-    });
-
+    itens.push({ produto_id: id, nome, sku, categoria, estoque, quantidade: 1 });
     renderTabela();
+    showToast(`${nome} adicionado!`, "sucesso");
+}
+
+function filtrarModal() {
+    const termo = document.getElementById("filtroModal").value.toLowerCase();
+
+    const filtrados = todosProdutos.filter(p =>
+        p.nome.toLowerCase().includes(termo) || p.sku.toLowerCase().includes(termo)
+    );
+
+    document.getElementById("listaModal").innerHTML = filtrados.map(p => `
+        <div class="produto-item">
+            <div class="produto-info">
+                <div class="produto-sku">${p.sku}</div>
+                <div class="produto-nome">${p.nome}</div>
+                <div class="produto-cat">${p.categoria} — Estoque: ${p.quantidade}</div>
+            </div>
+            <button class="btn-add" onclick="adicionarItem(${p.id}, '${p.nome}', '${p.sku}', '${p.categoria}', ${p.quantidade})">
+                + Adicionar
+            </button>
+        </div>
+    `).join("");
+}
+
+function showToast(msg, tipo = "sucesso") {
+    const toast = document.getElementById("toast");
+    document.getElementById("toastMsg").textContent = msg;
+    toast.style.borderLeftColor = tipo === "erro" ? "var(--danger)" : "var(--gold)";
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 3000);
 }
 
 function removerItem(idx) {
@@ -112,5 +151,21 @@ function renderTabela() {
 
     document.getElementById("totalItens").textContent = itens.length;
 }
+
+let todosProdutos = [];
+
+async function abrirModalBusca() {
+    const resposta = await fetch(`${API}/produtos`);
+    todosProdutos = await resposta.json();
+    
+    document.getElementById("modalBusca").style.display = "flex";
+    document.getElementById("filtroModal").value = "";
+    filtrarModal();
+}
+
+function fecharModalBusca() {
+    document.getElementById("modalBusca").style.display = "none";
+}
+
 
 buscarProduto();

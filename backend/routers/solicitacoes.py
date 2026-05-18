@@ -15,19 +15,23 @@ class AtualizarStatus(BaseModel):
     status: str
 
 @router.get("/solicitacoes")
-def listar_solicitacoes(status: str = None):
+def listar_solicitacoes(status: str = None, usuario_id: int = None):
     conn = get_conn()
     cursor = conn.cursor()
 
-    if status:
+    if status and usuario_id:
+        cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status FROM solicitacoes WHERE status = %s AND usuario_id = %s", (status, usuario_id))
+    elif usuario_id:
+        cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status FROM solicitacoes WHERE usuario_id = %s", (usuario_id,))
+    elif status:
         cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status FROM solicitacoes WHERE status = %s", (status,))
     else:
         cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status FROM solicitacoes")
-    
+
     solicitacoes = cursor.fetchall()
     cursor.close()
     conn.close()
-    return[
+    return [
         {
             "id": s[0],
             "usuario_id": s[1],

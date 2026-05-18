@@ -137,6 +137,7 @@ async function confirmarEnvio() {
 
 function renderTabela() {
     const tbody = document.getElementById("itensTabela");
+    document.getElementById("totalItens").textContent = itens.length;  // ← move para cá
 
     if (itens.length === 0) {
         tbody.innerHTML = `
@@ -158,8 +159,6 @@ function renderTabela() {
             </td>
         </tr>
     `).join("");
-
-    document.getElementById("totalItens").textContent = itens.length;
 }
 
 let todosProdutos = [];

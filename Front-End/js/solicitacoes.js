@@ -44,7 +44,7 @@ async function carregarSolicitacoes() {
 
 function logout() {
     localStorage.removeItem("usuario");
-    window.location.href = "../login.html";
+    window.location.href = "login.html";
 }
 
 carregarSolicitacoes();

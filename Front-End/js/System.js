@@ -2,6 +2,16 @@ const API = "http://localhost:8000";
 
 let itens = [];
 
+const usuario = JSON.parse(localStorage.getItem("usuario"));
+
+if (!usuario) {
+    window.location.href = "login.html";
+}
+
+document.getElementById("usuarioNome").textContent = usuario.nome;
+document.getElementById("perfilUsuario").textContent = usuario.perfil;
+document.getElementById("avatarLetra").textContent = usuario.nome.charAt(0).toUpperCase();
+
 async function buscarProduto() {
     const termo = document.getElementById("buscaProduto").value.trim().toLowerCase();
     const categoria = document.getElementById("categoria").value;
@@ -167,5 +177,17 @@ function fecharModalBusca() {
     document.getElementById("modalBusca").style.display = "none";
 }
 
+function limparFormulario() {
+    itens = [];
+    renderTabela();
+    document.getElementById("motivo").value = "";
+    document.getElementById("observacoes").value = "";
+    document.getElementById("buscaProduto").value = "";
+    document.getElementById("resultadoBusca").innerHTML = "";
+    showToast("Formulário limpo!", "sucesso");
+}
 
-buscarProduto();
+function logout() {
+    localStorage.removeItem("usuario");
+    window.location.href = "login.html";
+}

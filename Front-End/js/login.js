@@ -35,10 +35,16 @@ function toggleSenha() {
     }
 
     localStorage.setItem("usuario", JSON.stringify(dados));
-    window.location.href = "home.html";
+
+    if (dados.perfil === "proprietario") {
+        window.location.href = "proprietario.html";
+    } else if (dados.perfil === "logistica") {
+        window.location.href = "logistica.html";
+    } else {
+        window.location.href = "home.html";
+    }
 }
 
-    // Preenche usuário salvo
     window.addEventListener('DOMContentLoaded', () => {
       const salvo = localStorage.getItem('rb_usuario');
       if (salvo) {

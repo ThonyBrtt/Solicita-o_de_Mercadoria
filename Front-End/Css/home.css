@@ -488,3 +488,35 @@
       .actions-row { flex-direction: column; }
       .btn-enviar, .btn-limpar { width: 100%; justify-content: center; }
     }
+
+    /* ── BOTÕES AÇÃO ── */
+.btn-aprovar {
+    padding: 5px 12px;
+    background: var(--success);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    margin-right: 5px;
+}
+
+.btn-aprovar:hover { opacity: 0.85; }
+
+.btn-recusar {
+    padding: 5px 12px;
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.btn-recusar:hover { opacity: 0.85; }

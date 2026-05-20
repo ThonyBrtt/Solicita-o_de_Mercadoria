@@ -155,7 +155,7 @@ function renderTabela() {
             <td>${item.estoque}</td>
             <td>${item.quantidade}</td>
             <td>
-                <button onclick="removerItem(${idx})">✕</button>
+                <button class="btn-recusar" onclick="removerItem(${idx})">✕</button>
             </td>
         </tr>
     `).join("");

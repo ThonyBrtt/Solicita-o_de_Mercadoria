@@ -44,8 +44,8 @@ async function carregarSolicitacoes() {
                 <td>${s.motivo}</td>
                 <td>${s.status}</td>
                 <td>
-                    <button onclick="atualizarStatus(${s.id}, 'aprovado')">✔</button>
-                    <button onclick="atualizarStatus(${s.id}, 'recusado')">✘</button>
+                    <button class="btn-aprovar" onclick="atualizarStatus(${s.id}, 'aprovado')">✔</button>
+                    <button class="btn-recusar" onclick="atualizarStatus(${s.id}, 'recusado')">✘</button>
                 </td>
             </tr>
         `;

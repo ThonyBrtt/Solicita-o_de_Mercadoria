@@ -180,3 +180,24 @@ async function carregarProdutos() {
     render();
 
     carregarProdutos();
+
+    function renderSidebar() {
+    const menu = document.getElementById("menuPerfil");
+    const secao = document.getElementById("secaoMenu");
+
+    if (usuario.perfil === "logistica") {
+        secao.textContent = "Painel";
+        menu.innerHTML = `<a class="nav-item" href="logistica.html">Todas as Solicitações</a>`;
+    } else if (usuario.perfil === "vendas") {
+        secao.textContent = "Menu";
+        menu.innerHTML = `
+            <a class="nav-item" href="home.html">Nova Solicitação</a>
+            <a class="nav-item" href="solicitacoes.html">Minhas Solicitações</a>
+        `;
+    } else if (usuario.perfil === "proprietario") {
+        secao.textContent = "Painel";
+        menu.innerHTML = `<a class="nav-item" href="proprietario.html">Painel Geral</a>`;
+    }
+}
+
+renderSidebar();

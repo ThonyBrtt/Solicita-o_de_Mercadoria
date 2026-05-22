@@ -1,24 +1,35 @@
+const API = "http://localhost:8000";
 
-    // ── DADOS DE EXEMPLO ──
-    const produtos = [
-      { sku: 'CT-001', nome: 'Cortina Blackout Premium', categoria: 'Blackout', material: 'Tecido 100% Poliéster', estoque: 45, unidade: 'm', status: 'ok' },
-      { sku: 'CT-002', nome: 'Cortina Voil Branca', categoria: 'Cortina', material: 'Voil Transparente', estoque: 120, unidade: 'm', status: 'ok' },
-      { sku: 'CT-003', nome: 'Cortina Linho Natural', categoria: 'Cortina', material: 'Linho Importado', estoque: 8, unidade: 'm', status: 'baixo' },
-      { sku: 'CP-001', nome: 'Tecido Capotaria Preto', categoria: 'Capotaria', material: 'Tecido Automotivo', estoque: 0, unidade: 'm', status: 'sem' },
-      { sku: 'ES-001', nome: 'Espuma D33 Alta Densidade', categoria: 'Estofados', material: 'Espuma Injetada', estoque: 30, unidade: 'm²', status: 'ok' },
-      { sku: 'ES-002', nome: 'Tecido Suede Bege', categoria: 'Estofados', material: 'Suede Sintético', estoque: 5, unidade: 'm', status: 'baixo' },
-      { sku: 'AT-001', nome: 'Couro Automotivo Marrom', categoria: 'Automotivo', material: 'Couro Ecológico', estoque: 22, unidade: 'm', status: 'ok' },
-      { sku: 'AT-002', nome: 'Carpete Automotivo Preto', categoria: 'Automotivo', material: 'Carpete Pelúcia', estoque: 0, unidade: 'm²', status: 'sem' },
-      { sku: 'BK-001', nome: 'Blackout Duplo Face', categoria: 'Blackout', material: '100% Blackout', estoque: 60, unidade: 'm', status: 'ok' },
-      { sku: 'CT-004', nome: 'Cortina Veludo Cinza', categoria: 'Cortina', material: 'Veludo Nacional', estoque: 14, unidade: 'm', status: 'ok' },
-      { sku: 'ES-003', nome: 'Manta Acrílica Branca', categoria: 'Estofados', material: 'Acrílico 300g', estoque: 3, unidade: 'm', status: 'baixo' },
-      { sku: 'CP-002', nome: 'Tecido Teto Automotivo', categoria: 'Capotaria', material: 'Espumado 3mm', estoque: 18, unidade: 'm', status: 'ok' },
-    ];
+const usuario = JSON.parse(localStorage.getItem("usuario"));
+if (!usuario) window.location.href = "login.html";
 
-    let produtosFiltrados = [...produtos];
-    let viewAtual = 'grid';
-    let produtoSelecionado = null;
+document.getElementById("usuarioNome").textContent = usuario.nome;
+document.getElementById("perfilUsuario").textContent = usuario.perfil;
+document.getElementById("avatarLetra").textContent = usuario.nome.charAt(0).toUpperCase();
+let produtos = [];
+let produtosFiltrados = [];
+let viewAtual = 'grid';
+let produtoSelecionado = null;
 
+async function carregarProdutos() {
+    const resposta = await fetch(`${API}/produtos`);
+    const dados = await resposta.json();
+
+    // Mapeia os dados do banco para o formato que o catálogo usa
+    produtos = dados.map(p => ({
+        id: p.id,
+        sku: p.sku,
+        nome: p.nome,
+        categoria: p.categoria,
+        material: p.lote,
+        estoque: p.quantidade,
+        unidade: 'm',
+        status: p.quantidade === 0 ? 'sem' : p.quantidade <= p.quantidade_minima ? 'baixo' : 'ok'
+    }));
+
+    produtosFiltrados = [...produtos];
+    render();
+}
     function getBadgeClass(status) {
       return status === 'ok' ? 'badge-ok' : status === 'baixo' ? 'badge-baixo' : 'badge-sem';
     }
@@ -144,7 +155,7 @@
       if (produtoSelecionado) {
         showToast('Redirecionando para nova solicitação...');
         fecharModal();
-        setTimeout(() => { window.location.href = 'solicitacoes.html'; }, 1200);
+        setTimeout(() => { window.location.href = 'home.html'; }, 1200);
       }
     }
 
@@ -167,3 +178,5 @@
 
     // Init
     render();
+
+    carregarProdutos();

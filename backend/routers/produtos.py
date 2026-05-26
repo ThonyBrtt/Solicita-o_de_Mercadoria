@@ -20,7 +20,7 @@ class AtualizarQuantidadeProduto(BaseModel):
 def listar_produtos():
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, nome, sku, quantidade, quantidade_minima, categoria, lote FROM produtos")
+    cursor.execute("SELECT id, nome, sku, quantidade, quantidade_minima, categoria, lote FROM produtos WHERE ativo = true")
     produtos = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -96,3 +96,19 @@ def atualizar_quantidade(id: int, dados: AtualizarQuantidadeProduto):
     conn.close()
     
     return {"Mensagem": "Quantidade atualizada com sucesso"}
+
+@router.patch("/produtos/{id}/desativar")
+def desativar_produto(id: int):
+    conn = get_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM produtos WHERE id = %s", (id,))
+    if not cursor.fetchone():
+        cursor.close()
+        conn.close()
+        return {"erro": "Produto não encontrado"}
+
+    cursor.execute("UPDATE produtos SET ativo = false WHERE id = %s", (id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"mensagem": "Produto desativado com sucesso"}

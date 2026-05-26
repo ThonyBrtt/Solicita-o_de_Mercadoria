@@ -111,17 +111,23 @@ async function cadastrarProduto() {
 
 // ─── Exclui produto ───────────────────────────────────────────────
 async function excluirProduto(id) {
-  if (!confirm("Deseja excluir este produto?")) return;
+    if (!confirm("Deseja desativar este produto? Ele não aparecerá mais no catálogo.")) return;
 
-  try {
-    const resposta = await fetch(`${API}/produtos/${id}`, { method: "DELETE" });
-    if (!resposta.ok) throw new Error("Erro ao excluir");
-    showToast("Produto excluído.");
-    carregarProdutos();
-  } catch (err) {
-    console.error(err);
-    showToast("Erro ao excluir produto.");
-  }
+    try {
+        const resposta = await fetch(`${API}/produtos/${id}/desativar`, { method: "PATCH" });
+        const dados = await resposta.json();
+
+        if (dados.erro) {
+            showToast(dados.erro);
+            return;
+        }
+
+        showToast("Produto desativado!");
+        carregarProdutos();
+    } catch (err) {
+        console.error(err);
+        showToast("Erro ao desativar produto.");
+    }
 }
 
 // ─── Toast ────────────────────────────────────────────────────────

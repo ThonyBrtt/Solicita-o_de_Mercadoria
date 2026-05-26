@@ -104,3 +104,19 @@ def login(dados: LoginEntrada):
         "usuario": usuario[2],
         "perfil": usuario[3]
     }
+
+@router.delete("/usuarios/{id}")
+def excluir_usuario(id: int):
+    conn = get_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM usuarios WHERE id = %s", (id,))
+    if not cursor.fetchone():
+        cursor.close()
+        conn.close()
+        return {"erro": "Usuário não encontrado"}
+
+    cursor.execute("DELETE FROM usuarios WHERE id = %s", (id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"mensagem": "Usuário excluído com sucesso"}

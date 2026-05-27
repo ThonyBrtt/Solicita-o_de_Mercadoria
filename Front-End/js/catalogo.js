@@ -76,23 +76,35 @@ async function carregarProdutos() {
     }
 
     function renderLista() {
-      const tbody = document.getElementById('tabelaLista');
-      if (produtosFiltrados.length === 0) {
-        tbody.innerHTML = `<tr class="empty-row"><td colspan="7">Nenhum produto encontrado para os filtros selecionados.</td></tr>`;
+    const tbody = document.getElementById('tabelaLista');
+    if (produtosFiltrados.length === 0) {
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="7">Nenhum produto encontrado.</td></tr>`;
         return;
-      }
-      tbody.innerHTML = produtosFiltrados.map(p => `
-        <tr>
-          <td class="sku-cell">${p.sku}</td>
-          <td><strong>${p.nome}</strong></td>
-          <td>${p.categoria}</td>
-          <td>${p.material}</td>
-          <td>${p.estoque} ${p.unidade}</td>
-          <td><span class="produto-card-badge ${getBadgeClass(p.status)}" style="font-size:0.68rem; padding:3px 9px; border-radius:50px; font-weight:700; text-transform:uppercase;">${getBadgeLabel(p.status)}</span></td>
-          <td><button class="btn-ver" onclick="abrirModal(${produtos.indexOf(p)})">Ver</button></td>
-        </tr>
-      `).join('');
     }
+    tbody.innerHTML = produtosFiltrados.map(p => `
+        <tr>
+            <td class="sku-cell">${p.sku}</td>
+            <td><strong>${p.nome}</strong></td>
+            <td>${p.categoria}</td>
+            <td>${p.material}</td>
+            <td>${p.estoque} ${p.unidade}</td>
+            <td>
+                <span style="
+                    display:inline-block;
+                    padding:3px 9px;
+                    border-radius:50px;
+                    font-size:0.68rem;
+                    font-weight:700;
+                    text-transform:uppercase;
+                    ${p.status === 'ok' ? 'background:#E8F8EE; color:#27AE60; border:1px solid #A8DDB8;' : 
+                      p.status === 'baixo' ? 'background:#FEF9E7; color:#D4A017; border:1px solid #F0D060;' : 
+                      'background:#FDECEA; color:#C0392B; border:1px solid #F5C0BA;'}
+                ">${getBadgeLabel(p.status)}</span>
+            </td>
+            <td><button class="btn-ver" onclick="abrirModal(${produtos.indexOf(p)})">Ver</button></td>
+        </tr>
+    `).join('');
+}
 
     function render() {
       document.getElementById('totalProdutos').textContent = produtosFiltrados.length;

@@ -1,55 +1,91 @@
 const API = "http://localhost:8000";
 
 const usuario = JSON.parse(localStorage.getItem("usuario"));
-
-if (!usuario || usuario.perfil !== "logistica") {
-    window.location.href = "login.html";
-}
+if (!usuario || usuario.perfil !== "logistica") window.location.href = "login.html";
 
 document.getElementById("usuarioNome").textContent = usuario.nome;
 document.getElementById("perfilUsuario").textContent = usuario.perfil;
 document.getElementById("avatarLetra").textContent = usuario.nome.charAt(0).toUpperCase();
 
+let solicitacoes = [];
+let produtos = [];
+let usuarios = [];
+
 async function carregarSolicitacoes() {
-    const [resSolicitacoes, resProdutos, resUsuarios] = await Promise.all([
-        fetch(`${API}/solicitacoes`),
-        fetch(`${API}/produtos`),
-        fetch(`${API}/usuarios`)
-    ]);
+    try {
+        const [resSol, resProd, resUs] = await Promise.all([
+            fetch(`${API}/solicitacoes`),
+            fetch(`${API}/produtos`),
+            fetch(`${API}/usuarios`)
+        ]);
 
-    const solicitacoes = await resSolicitacoes.json();
-    const produtos = await resProdutos.json();
-    const usuarios = await resUsuarios.json();
+        solicitacoes = await resSol.json();
+        produtos     = await resProd.json();
+        usuarios     = await resUs.json();
 
-    const tbody = document.getElementById("tabelaAdmin");
+        console.log("Solicitações:", solicitacoes);
+        console.log("Primeiro status:", solicitacoes[0]?.status);
+
+        renderKanban();
+    } catch (err) {
+        console.error("Erro ao carregar:", err);
+        document.getElementById("colPendente").innerHTML = 
+            `<div class="kanban-empty">Erro ao carregar solicitações.</div>`;
+    }
+}
+
+function renderKanban() {
+    const colunas = {
+        pendente:  document.getElementById("colPendente"),
+        aprovado:  document.getElementById("colAprovado"),
+        recusado:  document.getElementById("colRecusado")
+    };
+
+    // Limpa e zera contadores
+    Object.keys(colunas).forEach(k => {
+        colunas[k].innerHTML = "";
+        document.getElementById(`count-${k}`).textContent = 0;
+    });
 
     if (solicitacoes.length === 0) {
-        tbody.innerHTML = `
-            <tr class="empty-row">
-                <td colspan="7">Nenhuma solicitação encontrada.</td>
-            </tr>`;
+        colunas.pendente.innerHTML = `<div class="kanban-empty">Nenhuma solicitação encontrada.</div>`;
         return;
     }
 
-    tbody.innerHTML = solicitacoes.map(s => {
-        const produto = produtos.find(p => p.id === s.produto_id);
+    solicitacoes.forEach(s => {
+        const produto    = produtos.find(p => p.id === s.produto_id);
         const solicitante = usuarios.find(u => u.id === s.usuario_id);
+        const status     = s.status || "pendente";
+        const col        = colunas[status] || colunas.pendente;
 
-        return `
-            <tr>
-                <td class="sku-cell">#${s.id}</td>
-                <td>${solicitante ? solicitante.nome : "Desconhecido"}</td>
-                <td>${produto ? produto.nome : "Desconhecido"}</td>
-                <td>${s.quantidade}</td>
-                <td>${s.motivo}</td>
-                <td>${s.status}</td>
-                <td>
-                    <button class="btn-aprovar" onclick="atualizarStatus(${s.id}, 'aprovado')">✔</button>
-                    <button class="btn-recusar" onclick="atualizarStatus(${s.id}, 'recusado')">✘</button>
-                </td>
-            </tr>
+        // Incrementa contador
+        const countEl = document.getElementById(`count-${status}`);
+        if (countEl) countEl.textContent = parseInt(countEl.textContent) + 1;
+
+        const card = document.createElement("div");
+        card.className = "kanban-card";
+        card.innerHTML = `
+            <div class="kanban-card-header">
+                <span class="kanban-id">#${s.id}</span>
+                <span class="kanban-motivo">${s.motivo}</span>
+            </div>
+            <div class="kanban-produto">${produto ? produto.nome : "Produto desconhecido"}</div>
+            <div class="kanban-solicitante">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                ${solicitante ? solicitante.nome : "Desconhecido"} · ${s.quantidade} un.
+            </div>
+            ${s.observacoes ? `<div class="kanban-obs">"${s.observacoes}"</div>` : ""}
+            ${status === "pendente" ? `
+            <div class="kanban-actions">
+                <button class="btn-aprovar" onclick="atualizarStatus(${s.id}, 'aprovado')">✔ Aprovar</button>
+                <button class="btn-recusar" onclick="atualizarStatus(${s.id}, 'recusado')">✘ Recusar</button>
+            </div>` : ""}
         `;
-    }).join("");
+        col.appendChild(card);
+    });
 }
 
 async function atualizarStatus(id, status) {
@@ -59,7 +95,7 @@ async function atualizarStatus(id, status) {
         body: JSON.stringify({ status })
     });
 
-    showToast(status === "aprovado" ? "Solicitação aprovada!" : "Solicitação recusada!", 
+    showToast(status === "aprovado" ? "Solicitação aprovada!" : "Solicitação recusada!",
               status === "aprovado" ? "sucesso" : "erro");
     carregarSolicitacoes();
 }

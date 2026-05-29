@@ -83,41 +83,44 @@
 
   <!-- MAIN -->
   <main class="main">
-
     <div class="page-header">
-      <div>
-        <div class="page-title">Painel de Solicitações</div>
-        <div class="page-subtitle">Gerencie todas as solicitações em aberto</div>
-      </div>
+        <div>
+            <div class="page-title">Painel de Solicitações</div>
+            <div class="page-subtitle">Gerencie todas as solicitações em aberto</div>
+        </div>
     </div>
 
-    <div class="card">
-      <div class="card-head dark">
-        <div class="card-head-title">Solicitações em Aberto</div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Solicitante</th>
-              <th>Produto</th>
-              <th>Quantidade</th>
-              <th>Motivo</th>
-              <th>Status</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="tabelaAdmin">
-            <tr class="empty-row">
-              <td colspan="7">Carregando...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <div class="kanban-board">
 
-  </main>
+        <!-- PENDENTE -->
+        <div class="kanban-col">
+            <div class="kanban-col-header pendente">
+                <span>Pendente</span>
+                <span class="badge-count" id="count-pendente">0</span>
+            </div>
+            <div class="kanban-cards" id="colPendente"></div>
+        </div>
+
+        <!-- APROVADO -->
+        <div class="kanban-col">
+            <div class="kanban-col-header aprovado">
+                <span>Aprovado</span>
+                <span class="badge-count" id="count-aprovado">0</span>
+            </div>
+            <div class="kanban-cards" id="colAprovado"></div>
+        </div>
+
+        <!-- RECUSADO -->
+        <div class="kanban-col">
+            <div class="kanban-col-header recusado">
+                <span>Recusado</span>
+                <span class="badge-count" id="count-recusado">0</span>
+            </div>
+            <div class="kanban-cards" id="colRecusado"></div>
+        </div>
+
+    </div>
+</main>
 
   <!-- TOAST -->
   <div class="toast" id="toast">

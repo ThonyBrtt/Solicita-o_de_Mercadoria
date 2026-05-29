@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from database import get_conn
 from pydantic import BaseModel
+from typing import Optional
 
 router = APIRouter()
 
@@ -8,8 +9,9 @@ class SolicitacaoEntrada(BaseModel):
     usuario_id: int
     produto_id: int
     quantidade: int
-    motivo:str
+    motivo: str
     prioridade: str
+    observacoes: Optional[str] = None
 
 class AtualizarStatus(BaseModel):
     status: str
@@ -20,13 +22,13 @@ def listar_solicitacoes(status: str = None, usuario_id: int = None):
     cursor = conn.cursor()
 
     if status and usuario_id:
-        cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status FROM solicitacoes WHERE status = %s AND usuario_id = %s", (status, usuario_id))
+        cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status, observacoes FROM solicitacoes WHERE status = %s AND usuario_id = %s", (status, usuario_id))
     elif usuario_id:
-        cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status FROM solicitacoes WHERE usuario_id = %s", (usuario_id,))
+        cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status, observacoes FROM solicitacoes WHERE usuario_id = %s", (usuario_id,))
     elif status:
-        cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status FROM solicitacoes WHERE status = %s", (status,))
+        cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status, observacoes FROM solicitacoes WHERE status = %s", (status,))
     else:
-        cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status FROM solicitacoes")
+        cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status, observacoes FROM solicitacoes")
 
     solicitacoes = cursor.fetchall()
     cursor.close()
@@ -38,7 +40,8 @@ def listar_solicitacoes(status: str = None, usuario_id: int = None):
             "produto_id": s[2],
             "quantidade": s[3],
             "motivo": s[4],
-            "status": s[5]
+            "status": s[5],
+            "observacoes": s[6]
         }
         for s in solicitacoes
     ]
@@ -81,13 +84,14 @@ def criar_solicitacao(solicitacao: SolicitacaoEntrada):
         conn.close()
         return {"Mensagem": "Quantidade insuficiente em estoque"}
 
-    cursor.execute("""INSERT INTO solicitacoes (usuario_id, produto_id, quantidade, motivo)
-                   VALUES (%s, %s, %s, %s) RETURNING id""",(
-                   solicitacao.usuario_id,
-                   solicitacao.produto_id,
-                   solicitacao.quantidade,
-                   solicitacao.motivo                     
-                   ))
+    cursor.execute("""INSERT INTO solicitacoes (usuario_id, produto_id, quantidade, motivo, observacoes)
+               VALUES (%s, %s, %s, %s, %s) RETURNING id""", (
+               solicitacao.usuario_id,
+               solicitacao.produto_id,
+               solicitacao.quantidade,
+               solicitacao.motivo,
+               solicitacao.observacoes
+               ))
     
     novo_id= cursor.fetchone()
     conn.commit()

@@ -113,6 +113,7 @@ async function confirmarEnvio() {
         return;
     }
 
+    const observacoes = document.getElementById("observacoes").value.trim();
     const usuario = JSON.parse(localStorage.getItem("usuario"));
 
     for (const item of itens) {
@@ -124,6 +125,7 @@ async function confirmarEnvio() {
                 produto_id: item.produto_id,
                 quantidade: item.quantidade,
                 motivo: motivo,
+                observacoes: observacoes, // ← adicionado
                 prioridade: "normal"
             })
         });
@@ -134,6 +136,7 @@ async function confirmarEnvio() {
     itens = [];
     renderTabela();
     document.getElementById("motivo").value = "";
+    document.getElementById("observacoes").value = "";
 }
 
 function renderTabela() {

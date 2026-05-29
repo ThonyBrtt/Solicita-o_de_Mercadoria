@@ -1,6 +1,6 @@
 const API = "http://localhost:8000";
 
-let itens = [];
+let itens = JSON.parse(localStorage.getItem("itensSolicitacao")) || [];
 
 const usuario = JSON.parse(localStorage.getItem("usuario"));
 
@@ -130,14 +130,16 @@ async function confirmarEnvio() {
     }
 
     alert("Solicitação enviada com sucesso!");
+    localStorage.removeItem("itensSolicitacao");
     itens = [];
     renderTabela();
     document.getElementById("motivo").value = "";
 }
 
 function renderTabela() {
+    localStorage.setItem("itensSolicitacao", JSON.stringify(itens)); // ← adiciona essa linha
     const tbody = document.getElementById("itensTabela");
-    document.getElementById("totalItens").textContent = itens.length;  // ← move para cá
+    document.getElementById("totalItens").textContent = itens.length;
 
     if (itens.length === 0) {
         tbody.innerHTML = `
@@ -178,6 +180,7 @@ function fecharModalBusca() {
 
 function limparFormulario() {
     itens = [];
+    localStorage.removeItem("itensSolicitacao");
     renderTabela();
     document.getElementById("motivo").value = "";
     document.getElementById("observacoes").value = "";
@@ -190,3 +193,5 @@ function logout() {
     localStorage.removeItem("usuario");
     window.location.href = "login.html";
 }
+
+renderTabela();

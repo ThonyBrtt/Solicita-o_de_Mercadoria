@@ -17,15 +17,16 @@ async function carregarProdutos() {
 
     // Mapeia os dados do banco para o formato que o catálogo usa
     produtos = dados.map(p => ({
-        id: p.id,
-        sku: p.sku,
-        nome: p.nome,
-        categoria: p.categoria,
-        material: p.lote,
-        estoque: p.quantidade,
-        unidade: 'm',
-        status: p.quantidade === 0 ? 'sem' : p.quantidade <= p.quantidade_minima ? 'baixo' : 'ok'
-    }));
+    id: p.id,
+    sku: p.sku,
+    nome: p.nome,
+    categoria: p.categoria,
+    material: p.lote,
+    estoque: p.quantidade,
+    unidade: 'm',
+    imagem: p.imagem ?? null, // ← adiciona isso
+    status: p.quantidade === 0 ? 'sem' : p.quantidade <= p.quantidade_minima ? 'baixo' : 'ok'
+}));
 
     produtosFiltrados = [...produtos];
     render();
@@ -46,34 +47,37 @@ async function carregarProdutos() {
     }
 
     function renderGrid() {
-      const grid = document.getElementById('viewGrid');
-      if (produtosFiltrados.length === 0) {
-        grid.innerHTML = `<div class="sem-resultados" style="grid-column:1/-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          Nenhum produto encontrado para os filtros selecionados.
-        </div>`;
+    const grid = document.getElementById('viewGrid');
+    if (produtosFiltrados.length === 0) {
+        grid.innerHTML = `<div class="sem-resultados" style="grid-column:1/-1">Nenhum produto encontrado.</div>`;
         return;
-      }
-      grid.innerHTML = produtosFiltrados.map((p, i) => `
-        <div class="produto-card" style="animation-delay:${i * 0.04}s" onclick="abrirModal(${produtos.indexOf(p)})">
-          <div class="produto-card-img">
-            ${iconeCategoria()}
-            <span class="produto-card-badge ${getBadgeClass(p.status)}">${getBadgeLabel(p.status)}</span>
-          </div>
-          <div class="produto-card-body">
-            <div class="produto-card-sku">${p.sku}</div>
-            <div class="produto-card-nome">${p.nome}</div>
-            <div class="produto-card-cat">${p.categoria} · ${p.material}</div>
-            <div class="produto-card-footer">
-              <div class="estoque-info">
-                <strong>${p.estoque} ${p.unidade}</strong><br>em estoque
-              </div>
-              <button class="btn-ver" onclick="event.stopPropagation(); abrirModal(${produtos.indexOf(p)})">Ver</button>
-            </div>
-          </div>
-        </div>
-      `).join('');
     }
+    grid.innerHTML = produtosFiltrados.map((p, i) => {
+        const imgHtml = p.imagem
+            ? `<img src="${p.imagem}" alt="${p.nome}" style="width:100%;height:100%;object-fit:cover;">`
+            : iconeCategoria();
+
+        return `
+            <div class="produto-card" style="animation-delay:${i * 0.04}s" onclick="abrirModal(${produtos.indexOf(p)})">
+                <div class="produto-card-img">
+                    ${imgHtml}
+                    <span class="produto-card-badge ${getBadgeClass(p.status)}">${getBadgeLabel(p.status)}</span>
+                </div>
+                <div class="produto-card-body">
+                    <div class="produto-card-sku">${p.sku}</div>
+                    <div class="produto-card-nome">${p.nome}</div>
+                    <div class="produto-card-cat">${p.categoria} · ${p.material}</div>
+                    <div class="produto-card-footer">
+                        <div class="estoque-info">
+                            <strong>${p.estoque} ${p.unidade}</strong><br>em estoque
+                        </div>
+                        <button class="btn-ver" onclick="event.stopPropagation(); abrirModal(${produtos.indexOf(p)})">Ver</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
 
     function renderLista() {
     const tbody = document.getElementById('tabelaLista');
@@ -144,19 +148,35 @@ async function carregarProdutos() {
     }
 
     function abrirModal(idx) {
-      const p = produtos[idx];
-      produtoSelecionado = p;
-      document.getElementById('modalTitulo').textContent = p.nome;
-      document.getElementById('modalFields').innerHTML = `
+    const p = produtos[idx];
+    produtoSelecionado = p;
+    document.getElementById('modalTitulo').textContent = p.nome;
+
+    const imgHtml = p.imagem
+    ? `<div class="modal-field" style="grid-column:1/-1">
+         <img src="${p.imagem}" alt="${p.nome}" style="width:100%; height:160px; object-fit:cover; border-radius:7px;">
+       </div>`
+    : '';
+
+    document.getElementById('modalFields').innerHTML = `
+        <div class="modal-field" style="grid-column:1/-1">${imgHtml}</div>
         <div class="modal-field"><label>SKU</label><span>${p.sku}</span></div>
         <div class="modal-field"><label>Categoria</label><span>${p.categoria}</span></div>
         <div class="modal-field"><label>Material</label><span>${p.material}</span></div>
         <div class="modal-field"><label>Unidade</label><span>${p.unidade}</span></div>
         <div class="modal-field"><label>Em Estoque</label><span>${p.estoque} ${p.unidade}</span></div>
-        <div class="modal-field"><label>Status</label><span class="produto-card-badge ${getBadgeClass(p.status)}" style="font-size:0.72rem; padding:3px 10px; border-radius:50px;">${getBadgeLabel(p.status)}</span></div>
-      `;
-      document.getElementById('overlay').classList.add('show');
-    }
+        <div class="modal-field"><label>Status</label>
+            <span style="
+                display:inline-block; padding:3px 9px; border-radius:50px;
+                font-size:0.68rem; font-weight:700; text-transform:uppercase;
+                ${p.status === 'ok' ? 'background:#E8F8EE; color:#27AE60; border:1px solid #A8DDB8;' :
+                  p.status === 'baixo' ? 'background:#FEF9E7; color:#D4A017; border:1px solid #F0D060;' :
+                  'background:#FDECEA; color:#C0392B; border:1px solid #F5C0BA;'}
+            ">${getBadgeLabel(p.status)}</span>
+        </div>
+    `;
+    document.getElementById('overlay').classList.add('show');
+}
 
     function fecharModal() {
       document.getElementById('overlay').classList.remove('show');
@@ -164,12 +184,31 @@ async function carregarProdutos() {
     }
 
     function irParaSolicitacao() {
-      if (produtoSelecionado) {
-        showToast('Redirecionando para nova solicitação...');
+    if (!produtoSelecionado) return;
+
+    const itensExistentes = JSON.parse(localStorage.getItem("itensSolicitacao")) || [];
+
+    const jaExiste = itensExistentes.find(i => i.produto_id === produtoSelecionado.id);
+    if (jaExiste) {
+        showToast("Produto já está na solicitação!");
         fecharModal();
-        setTimeout(() => { window.location.href = 'home.html'; }, 1200);
-      }
+        return;
     }
+
+    itensExistentes.push({
+        produto_id: produtoSelecionado.id,
+        nome: produtoSelecionado.nome,
+        sku: produtoSelecionado.sku,
+        categoria: produtoSelecionado.categoria,
+        estoque: produtoSelecionado.estoque,
+        quantidade: 1
+    });
+
+    localStorage.setItem("itensSolicitacao", JSON.stringify(itensExistentes));
+    showToast(`${produtoSelecionado.nome} adicionado à solicitação!`);
+    fecharModal();
+    setTimeout(() => { window.location.href = "home.html"; }, 1200);
+}
 
     function showToast(msg) {
       const t = document.getElementById('toast');

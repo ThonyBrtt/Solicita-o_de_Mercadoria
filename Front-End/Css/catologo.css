@@ -515,3 +515,48 @@
     .motivo-row {
   display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
 }
+
+/* ── UPLOAD IMAGEM ── */
+.img-upload-label {
+  display: block; cursor: pointer;
+  border: 2px dashed var(--border);
+  border-radius: 7px; overflow: hidden;
+  transition: border-color 0.18s;
+}
+
+.img-upload-label:hover { border-color: var(--gold); }
+
+.img-upload-placeholder {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 8px; height: 160px;
+  color: var(--text-muted); font-size: 0.85rem;
+}
+
+.img-upload-placeholder svg { width: 36px; height: 36px; color: var(--border); }
+
+.btn-remover-img {
+  margin-top: 6px;
+  background: none; border: none;
+  color: var(--danger); font-size: 0.78rem;
+  font-family: 'Barlow', sans-serif; font-weight: 600;
+  cursor: pointer; padding: 0;
+  transition: opacity 0.15s;
+}
+
+.btn-remover-img:hover { opacity: 0.7; }
+
+.btn-recusar {
+    padding: 5px 12px;
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.btn-recusar:hover { opacity: 0.85; }

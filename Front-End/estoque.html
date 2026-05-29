@@ -100,52 +100,70 @@
 
     <!-- CADASTRAR -->
     <div class="card">
-      <div class="card-head">
-        <div class="card-head-title">Cadastrar Novo Produto</div>
+  <div class="card-head">
+    <div class="card-head-title">Cadastrar Novo Produto</div>
+  </div>
+  <div class="card-body">
+    <div class="motivo-row">
+      <div>
+        <label class="field-label">Nome</label>
+        <input type="text" class="input-base" id="nome" placeholder="Nome do produto"/>
       </div>
-      <div class="card-body">
-        <div class="motivo-row">
-          <div>
-            <label class="field-label">Nome</label>
-            <input type="text" class="input-base" id="nome" placeholder="Nome do produto"/>
-          </div>
-          <div>
-            <label class="field-label">SKU</label>
-            <input type="text" class="input-base" id="sku" placeholder="Ex: CT-001"/>
-          </div>
-        </div>
-        <div class="motivo-row" style="margin-top:12px">
-          <div>
-            <label class="field-label">Categoria</label>
-            <select class="input-base" id="categoria">
-              <option value="">Selecione...</option>
-              <option value="Cortina">Cortina</option>
-              <option value="Blackout">Blackout</option>
-              <option value="Capotaria">Capotaria</option>
-              <option value="Estofados">Estofados</option>
-              <option value="Automotivo">Automotivo</option>
-            </select>
-          </div>
-          <div>
-            <label class="field-label">Quantidade</label>
-            <input type="number" class="input-base" id="quantidade" placeholder="0" min="0"/>
-          </div>
-        </div>
-        <div class="motivo-row" style="margin-top:12px">
-          <div>
-            <label class="field-label">Quantidade Mínima</label>
-            <input type="number" class="input-base" id="quantidade_minima" placeholder="0" min="0"/>
-          </div>
-          <div>
-            <label class="field-label">Lote</label>
-            <input type="number" class="input-base" id="lote" placeholder="0" min="0"/>
-          </div>
-        </div>
-        <div class="actions-row" style="margin-top:16px">
-          <button class="btn-enviar" onclick="cadastrarProduto()">+ Cadastrar Produto</button>
-        </div>
+      <div>
+        <label class="field-label">SKU</label>
+        <input type="text" class="input-base" id="sku" placeholder="Ex: CT-001"/>
       </div>
     </div>
+    <div class="motivo-row" style="margin-top:12px">
+      <div>
+        <label class="field-label">Categoria</label>
+        <select class="input-base" id="categoria">
+          <option value="">Selecione...</option>
+          <option value="Cortina">Cortina</option>
+          <option value="Blackout">Blackout</option>
+          <option value="Capotaria">Capotaria</option>
+          <option value="Estofados">Estofados</option>
+          <option value="Automotivo">Automotivo</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label">Quantidade</label>
+        <input type="number" class="input-base" id="quantidade" placeholder="0" min="0"/>
+      </div>
+    </div>
+    <div class="motivo-row" style="margin-top:12px">
+      <div>
+        <label class="field-label">Quantidade Mínima</label>
+        <input type="number" class="input-base" id="quantidade_minima" placeholder="0" min="0"/>
+      </div>
+      <div>
+        <label class="field-label">Lote</label>
+        <input type="number" class="input-base" id="lote" placeholder="0" min="0"/>
+      </div>
+    </div>
+
+    <!-- CAMPO IMAGEM -->
+    <div style="margin-top:12px">
+      <label class="field-label">Imagem do Produto</label>
+      <label class="img-upload-label" id="imgUploadLabel">
+        <input type="file" id="imagemProduto" accept="image/*" style="display:none" onchange="previewImagem(this)"/>
+        <div class="img-upload-placeholder" id="imgPlaceholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+          <span>Clique para selecionar uma imagem</span>
+        </div>
+        <img id="imgPreview" src="" alt="Preview" style="display:none; width:100%; height:160px; object-fit:cover; border-radius:7px;"/>
+      </label>
+      <button class="btn-remover-img" id="btnRemoverImg" style="display:none" onclick="removerImagem()">✕ Remover imagem</button>
+    </div>
+
+    <div class="actions-row" style="margin-top:16px">
+      <button class="btn-enviar" onclick="cadastrarProduto()">+ Cadastrar Produto</button>
+    </div>
+  </div>
+</div>
 
     <!-- LISTAGEM -->
 <div class="card" style="animation-delay:0.12s">
@@ -193,20 +211,13 @@
         <button class="modal-close" onclick="fecharModal()">✕</button>
       </div>
       <div class="modal-body">
-        <div class="modal-img">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21 15 16 10 5 21"/>
-          </svg>
-        </div>
+        
         <div class="modal-fields" id="modalFields"></div>
       </div>
       <div class="modal-btns">
-        <button class="btn-cancel" onclick="fecharModal()">Fechar</button>
-        <button class="btn-confirm" onclick="irParaSolicitacao()">
-          + Adicionar à Solicitação
-        </button>
-      </div>
+    <button class="btn-cancel" onclick="fecharModal()">Fechar</button>
+    <button class="btn-confirm" id="btnConfirm">Salvar Alterações</button>
+</div>
     </div>
   </div>
 
@@ -217,7 +228,6 @@
     </svg>
     <span id="toastMsg"></span>
   </div>
-  <script src="js/catalogo.js"></script>
   <script src="js/estoque.js"></script>
 </body>
 </html>

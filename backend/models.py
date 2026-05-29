@@ -13,15 +13,16 @@ def criar_tabelas():
                    )""")
     
     cursor.execute("""CREATE TABLE IF NOT EXISTS produtos(
-               id SERIAL PRIMARY KEY,
-               nome VARCHAR(100) NOT NULL,
-               sku VARCHAR(50) UNIQUE NOT NULL,
-               quantidade INTEGER NOT NULL DEFAULT 0,
-               quantidade_minima INTEGER NOT NULL DEFAULT 0,
-               categoria VARCHAR(100) NOT NULL,
-               lote INT,
-               ativo BOOLEAN NOT NULL DEFAULT true
-               )""")
+                id SERIAL PRIMARY KEY,
+                nome VARCHAR(100) NOT NULL,
+                sku VARCHAR(50) UNIQUE NOT NULL,
+                quantidade INTEGER NOT NULL DEFAULT 0,
+                quantidade_minima INTEGER NOT NULL DEFAULT 0,
+                categoria VARCHAR(100) NOT NULL,
+                lote INT,
+                ativo BOOLEAN NOT NULL DEFAULT true,
+                imagem TEXT
+                )""")
     
     cursor.execute("""CREATE TABLE IF NOT EXISTS solicitacoes(
                    id SERIAL PRIMARY KEY,

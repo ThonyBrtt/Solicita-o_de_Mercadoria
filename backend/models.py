@@ -33,7 +33,8 @@ def criar_tabelas():
                    prioridade VARCHAR(20) NOT NULL DEFAULT 'alta',
                    status VARCHAR(30) NOT NULL DEFAULT 'pendente',
                    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                   observacoes TEXT
+                   observacoes TEXT,
+                   atualizado_em TIMESTAMP
                    )""")
 
     conn.commit()

@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from models import criar_tabelas
 from routers import produtos, solicitacoes, usuarios
+from routers import dashboard
 
 app = FastAPI()
 
@@ -25,6 +26,8 @@ app.include_router(produtos.router)
 app.include_router(solicitacoes.router)
 
 app.include_router(usuarios.router)
+
+app.include_router(dashboard.router)
 
 @app.get("/")
 def raiz():

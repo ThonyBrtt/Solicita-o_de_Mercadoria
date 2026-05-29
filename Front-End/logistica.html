@@ -90,6 +90,68 @@
         </div>
     </div>
 
+    <!-- DASHBOARD -->
+<div class="dashboard-grid">
+
+    <!-- Card Totais -->
+    <div class="dash-card">
+        <div class="dash-card-title">Solicitações</div>
+        <div class="dash-stats">
+            <div class="dash-stat">
+                <div class="dash-stat-val" id="dHoje">—</div>
+                <div class="dash-stat-label">Hoje</div>
+            </div>
+            <div class="dash-stat">
+                <div class="dash-stat-val" id="dSemana">—</div>
+                <div class="dash-stat-label">Esta semana</div>
+            </div>
+            <div class="dash-stat">
+                <div class="dash-stat-val" id="dMes">—</div>
+                <div class="dash-stat-label">Este mês</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Taxas -->
+    <div class="dash-card">
+        <div class="dash-card-title">Aprovação vs Recusa</div>
+        <div class="dash-stats">
+            <div class="dash-stat aprovado">
+                <div class="dash-stat-val" id="dAprovadas">—</div>
+                <div class="dash-stat-label">Aprovadas</div>
+            </div>
+            <div class="dash-stat recusado">
+                <div class="dash-stat-val" id="dRecusadas">—</div>
+                <div class="dash-stat-label">Recusadas</div>
+            </div>
+            <div class="dash-stat pendente">
+                <div class="dash-stat-val" id="dPendentes">—</div>
+                <div class="dash-stat-label">Pendentes</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Tempo médio -->
+    <div class="dash-card">
+        <div class="dash-card-title">Tempo Médio de Resposta</div>
+        <div class="dash-tempo" id="dTempo">—</div>
+        <div class="dash-tempo-label">horas entre pendente → resposta</div>
+    </div>
+
+    <!-- Top Produtos -->
+    <div class="dash-card">
+        <div class="dash-card-title">Top 5 Produtos</div>
+        <div id="topProdutos" class="rank-list"></div>
+    </div>
+
+    <!-- Top Usuários -->
+    <div class="dash-card">
+        <div class="dash-card-title">Top 5 Solicitantes</div>
+        <div id="topUsuarios" class="rank-list"></div>
+    </div>
+
+</div>
+
     <div class="kanban-board">
 
         <!-- PENDENTE -->

@@ -135,7 +135,10 @@ def atualizar_status(id:int, status: AtualizarStatus):
         conn.close()
         return {"Mensagem": "Solicitação não encontrada"}
     
-    cursor.execute("UPDATE solicitacoes SET status = %s WHERE id = %s",(status.status, id))
+    cursor.execute(
+    "UPDATE solicitacoes SET status = %s, atualizado_em = CURRENT_TIMESTAMP WHERE id = %s",
+    (status.status, id)
+    )
     conn.commit()
     cursor.close()
     conn.close()

@@ -113,4 +113,48 @@ function logout() {
     window.location.href = "login.html";
 }
 
+async function carregarDashboard() {
+    try {
+        const res = await fetch(`${API}/dashboard`);
+        const d = await res.json();
+
+        // Totais
+        document.getElementById("dHoje").textContent   = d.totais.hoje;
+        document.getElementById("dSemana").textContent = d.totais.semana;
+        document.getElementById("dMes").textContent    = d.totais.mes;
+
+        // Taxas
+        document.getElementById("dAprovadas").textContent  = `${d.taxas.pct_aprovacao}%`;
+        document.getElementById("dRecusadas").textContent  = `${d.taxas.pct_recusa}%`;
+        document.getElementById("dPendentes").textContent  = d.taxas.pendentes;
+
+        // Tempo médio
+        document.getElementById("dTempo").textContent = d.tempo_medio_horas
+            ? `${d.tempo_medio_horas}h` : "—";
+
+        // Top produtos
+        document.getElementById("topProdutos").innerHTML = d.top_produtos.map((p, i) => `
+            <div class="rank-item">
+                <span class="rank-pos">${i + 1}</span>
+                <span class="rank-nome">${p.nome}</span>
+                <span class="rank-total">${p.total}</span>
+            </div>
+        `).join("");
+
+        // Top usuários
+        document.getElementById("topUsuarios").innerHTML = d.top_usuarios.map((u, i) => `
+            <div class="rank-item">
+                <span class="rank-pos">${i + 1}</span>
+                <span class="rank-nome">${u.nome}</span>
+                <span class="rank-total">${u.total}</span>
+            </div>
+        `).join("");
+
+    } catch (err) {
+        console.error("Erro ao carregar dashboard:", err);
+    }
+}
+
+carregarSolicitacoes();
+carregarDashboard();
 carregarSolicitacoes();

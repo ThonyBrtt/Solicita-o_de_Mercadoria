@@ -196,4 +196,24 @@ function logout() {
     setTimeout(() => { window.location.href = "login.html"; }, 1000);
 }
 
+function abrirModal(idx) {
+      const p = produtos[idx];
+      produtoSelecionado = p;
+      document.getElementById('modalTitulo').textContent = p.nome;
+      document.getElementById('modalFields').innerHTML = `
+        <div class="modal-field"><label>SKU</label><span>${p.sku}</span></div>
+        <div class="modal-field"><label>Categoria</label><span>${p.categoria}</span></div>
+        <div class="modal-field"><label>Material</label><span>${p.material}</span></div>
+        <div class="modal-field"><label>Unidade</label><span>${p.unidade}</span></div>
+        <div class="modal-field"><label>Em Estoque</label><span>${p.estoque} ${p.unidade}</span></div>
+        <div class="modal-field"><label>Status</label><span class="produto-card-badge ${getBadgeClass(p.status)}" style="font-size:0.72rem; padding:3px 10px; border-radius:50px;">${getBadgeLabel(p.status)}</span></div>
+      `;
+      document.getElementById('overlay').classList.add('show');
+    }
+
+    function fecharModal() {
+      document.getElementById('overlay').classList.remove('show');
+      produtoSelecionado = null;
+    }
+
 carregarProdutos();

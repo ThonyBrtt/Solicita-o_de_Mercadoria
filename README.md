@@ -9,19 +9,27 @@
 
 **Repo**: [GitHub](https://github.com/ThonyBrtt/Solicita-o_de_Mercadoria) - veja branches/commits.
 
-## Rodar
+## Como Rodar
+
+### Backend (FastAPI)
+
+```powershell
+cd backend
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+uvicorn main:app --reload
 ```
-start index.html
-```
-(VSCode Live Server recomendado)
+
+O servidor roda em `http://localhost:8000`. As tabelas do banco são criadas automaticamente na inicialização.
+
+### Frontend
+
+Abra o `index.html` no navegador ou use a extensão **Live Server** do VSCode para servir os arquivos estáticos.
+
+O frontend consome a API em `http://localhost:8000` (configurado em `Front-End/js/System.js`).
 
 ## Tech Essencial
 - HTML5 + Bootstrap 5 + CSS Custom
+- FastAPI + Python
+- PostgreSQL (Supabase)
 - Responsivo, Dark/Light mode
-
-## Próximo
-- Backend/DB
-- Auth real
-- Dashboard completo
-
-Veja branches GitHub para progresso atual.

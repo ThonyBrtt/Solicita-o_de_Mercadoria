@@ -1,0 +1,282 @@
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brown-dark: #5C4A28;
+      --brown-mid:  #7A6235;
+      --brown-bg:   #A08550;
+      --cream:      #F5EDD8;
+      --cream-light:#FDF8EF;
+      --gold:       #C89A2E;
+      --gold-hover: #B08820;
+      --text-dark:  #2C1F0E;
+      --text-muted: #7A6A50;
+      --border:     #D6C49A;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Barlow', sans-serif;
+      background: var(--brown-bg);
+    }
+
+    .page {
+      display: flex;
+      height: 100vh;
+      min-height: 500px;
+    }
+
+    /* ── PAINEL ESQUERDO ── */
+    .left-panel {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--brown-dark);
+    }
+
+    /* Padrão hexagonal gerado em CSS */
+    .hex-bg {
+      position: absolute;
+      inset: 0;
+      background-color: var(--brown-dark);
+      background-image:
+        repeating-linear-gradient(
+          60deg,
+          transparent,
+          transparent 28px,
+          rgba(255,255,255,0.04) 28px,
+          rgba(255,255,255,0.04) 30px
+        ),
+        repeating-linear-gradient(
+          -60deg,
+          transparent,
+          transparent 28px,
+          rgba(255,255,255,0.04) 28px,
+          rgba(255,255,255,0.04) 30px
+        ),
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 28px,
+          rgba(255,255,255,0.04) 28px,
+          rgba(255,255,255,0.04) 30px
+        );
+      opacity: 1;
+    }
+
+    /* grades de tons para criar profundidade */
+    .hex-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 30% 60%, rgba(160,120,50,0.35) 0%, transparent 65%),
+                  radial-gradient(ellipse at 70% 20%, rgba(80,55,20,0.5) 0%, transparent 60%);
+    }
+
+    .logo-wrap {
+      position: relative;
+      z-index: 2;
+      background: var(--text-dark);
+      border-radius: 6px;
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+    }
+
+    .logo-wrap img {
+      height: 44px;
+      width: auto;
+      display: block;
+      /* fallback se imagem não carregar */
+    }
+
+    /* Fallback quando imagem não está disponível */
+    .logo-text-fallback {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+    }
+
+    .logo-name {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
+
+    .logo-name span { color: var(--gold); }
+
+    /* ── PAINEL DIREITO ── */
+    .right-panel {
+      width: 420px;
+      min-width: 340px;
+      background: var(--brown-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 32px;
+    }
+
+    .form-box {
+      width: 100%;
+      max-width: 340px;
+      background: var(--cream-light);
+      border-radius: 10px;
+      padding: 40px 36px 32px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    }
+
+    /* Cabeçalho do card */
+    .form-header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    .entra-text {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      letter-spacing: -0.5px;
+    }
+
+    .entra-icon {
+      width: 38px;
+      height: 38px;
+      background: var(--text-dark);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .entra-icon svg { width: 24px; height: 24px; }
+
+    /* Campos */
+    .field-group { margin-bottom: 18px; }
+
+    .field-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .field-wrap {
+      position: relative;
+    }
+
+    .field-wrap input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: #fff;
+      font-family: 'Barlow', sans-serif;
+      font-size: 0.97rem;
+      color: var(--text-dark);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field-wrap input:focus {
+      border-color: var(--gold);
+    }
+
+    .toggle-pw {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      padding: 0;
+    }
+
+    .toggle-pw svg { width: 18px; height: 18px; }
+
+    /* Botão */
+    .btn-acessar {
+      width: 100%;
+      padding: 13px;
+      background: var(--gold);
+      color: #fff;
+      font-family: 'Barlow', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-acessar:hover  { background: var(--gold-hover); }
+    .btn-acessar:active { transform: scale(0.98); }
+
+    /* Lembrar / ajuda */
+    .form-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+
+    .remember {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .remember input[type=checkbox] {
+      accent-color: var(--gold);
+      width: 14px;
+      height: 14px;
+    }
+
+    .help-link {
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .help-link:hover { color: var(--gold); }
+
+    /* Rodapé */
+    .copy {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Responsivo */
+    @media (max-width: 700px) {
+      .left-panel { display: none; }
+      .right-panel { width: 100%; min-width: unset; background: var(--brown-bg); }
+    }

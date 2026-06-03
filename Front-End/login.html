@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Sistema Revest Bem - Solicitação de Mercadorias" />
+  <link rel="icon" href="Imagens/Revestico.ico" type="image/x-icon">
+  <title>Revest Bem - Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="Css/sing-up.css">
+</head>
+<body>
+  <div class="page">
+
+    <!-- ESQUERDA: imagem hexagonal + logo -->
+    <div class="left-panel">
+  <div class="hex-bg"></div>
+  <div class="logo-wrap">
+    <img src="Imagens/Logo.png" alt="Revest Bem" height="54" style="object-fit:contain;">
+    <span class="logo-name">Revest<span>bem</span></span>
+  </div>
+</div>
+    <!-- DIREITA: formulário -->
+    <div class="right-panel">
+      <div class="form-box">
+
+        <!-- "EntraR" com ícone -->
+        <div class="form-header">
+          <span class="entra-text">Entra</span>
+          <div class="entra-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 12H19M19 12L15 8M19 12L15 16" stroke="#C89A2E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 19V5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <form onsubmit="handleLogin(event)">
+
+          <!-- USUÁRIO -->
+          <div class="field-group">
+            <label for="usuario">Usuário</label>
+            <div class="field-wrap">
+              <input type="text"
+                     id="usuario"
+                     name="usuario"
+                     placeholder="Vendedor / Admin"
+                     autocomplete="username"
+                     required />
+            </div>
+          </div>
+
+          <!-- SENHA -->
+          <div class="field-group">
+            <label for="senha">Senha</label>
+            <div class="field-wrap">
+              <input type="password"
+                     id="senha"
+                     name="senha"
+                     placeholder="••••••••"
+                     autocomplete="current-password"
+                     required />
+              <button type="button" class="toggle-pw" onclick="toggleSenha()" title="Mostrar/ocultar senha">
+                <svg id="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- BOTÃO -->
+          <button type="submit" class="btn-acessar">Acessar</button>
+
+          <!-- LEMBRAR / AJUDA -->
+          <div class="form-footer">
+            <label class="remember">
+              <input type="checkbox" id="lembrar" />
+              Lembrar login
+            </label>
+            <a href="#" class="help-link">Precisa de ajuda?</a>
+          </div>
+
+        </form>
+        
+        <p class="copy">© 2026 Revest Bem — Sistema de Estoque</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/login.js"></script>
+</body>
+</html>

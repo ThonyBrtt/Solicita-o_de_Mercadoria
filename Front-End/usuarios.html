@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Revest Bem – Usuários</title>
+  <link rel="icon" href="Imagens/Logo.png" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="Css/home.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-brand">
+      <div class="brand-icon">
+        <img src="Imagens/Logo.png" alt="Logo" width="32" height="32" style="object-fit:contain; border-radius:4px;">
+      </div>
+      <div class="brand-name">Revestbem<small>Estoque</small></div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-chip">
+        <div class="user-avatar" id="avatarLetra">L</div>
+        <div class="user-info">
+          <div class="u-name" id="usuarioNome">Logística</div>
+          <div class="u-role" id="perfilUsuario">Logística</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="logout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Sair
+      </button>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-section">Painel</div>
+    <a class="nav-item" href="logistica.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+      </svg>
+      Todas as Solicitações
+    </a>
+    <a class="nav-item active" href="usuarios.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      Usuários
+    </a>
+    <div class="sidebar-section">Sistema</div>
+    <a class="nav-item" href="estoque.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+        <line x1="8" y1="21" x2="16" y2="21"/>
+        <line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      Catálogo
+    </a>
+    <a class="nav-item" href="configuracoesLogistica.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.07 4.93l-1.41 1.41M16.24 7.76a6 6 0 1 0 0 8.49"/>
+      </svg>
+      Configurações
+    </a>
+  </aside>
+
+  <main class="main">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">Usuários</div>
+        <div class="page-subtitle">Gerencie os usuários do sistema</div>
+      </div>
+    </div>
+
+    <!-- CADASTRAR -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-title">Cadastrar Novo Usuário</div>
+      </div>
+      <div class="card-body">
+        <div class="motivo-row">
+          <div>
+            <label class="field-label">Nome</label>
+            <input type="text" class="input-base" id="nome" placeholder="Nome completo"/>
+          </div>
+          <div>
+            <label class="field-label">Usuário</label>
+            <input type="text" class="input-base" id="usuario" placeholder="Login de acesso"/>
+          </div>
+        </div>
+        <div class="motivo-row" style="margin-top:12px">
+          <div>
+            <label class="field-label">Senha</label>
+            <input type="password" class="input-base" id="senha" placeholder="••••••••"/>
+          </div>
+          <div>
+            <label class="field-label">Perfil</label>
+            <select class="input-base" id="perfil">
+                <option value="">Selecione...</option>
+                <option value="vendas">Vendas</option>
+                <option value="logistica">Logística</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions-row" style="margin-top:16px">
+          <button class="btn-enviar" onclick="cadastrarUsuario()">+ Cadastrar Usuário</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTAGEM -->
+    <div class="card">
+      <div class="card-head dark">
+        <div class="card-head-title">
+          Usuários Cadastrados
+          <span class="badge-count" id="totalUsuarios">0</span>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nome</th>
+              <th>Usuário</th>
+              <th>Perfil</th>
+              <th style="width:160px">Alterar Perfil</th>
+              <th style="width:60px"></th>
+            </tr>
+          </thead>
+          <tbody id="tabelaUsuarios">
+            <tr class="empty-row">
+              <td colspan="6">Carregando...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <div class="toast" id="toast">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    <span id="toastMsg"></span>
+  </div>
+
+  <script src="js/usuarios.js"></script>
+</body>
+</html>

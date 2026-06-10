@@ -26,13 +26,12 @@ async function buscarProduto() {
     );
 
     if (exato) {
-        adicionarItem(exato.id, exato.nome, exato.sku, exato.categoria, exato.disponivel ?? exato.quantidade);
+        abrirSeletorLote(exato.id, exato.nome, exato.sku, exato.categoria, exato.disponivel ?? exato.quantidade);
         document.getElementById("buscaProduto").value = "";
         document.getElementById("resultadoBusca").innerHTML = "";
         return;
     }
 
-    // Se não achou exato, mostra resultado filtrado abaixo
     const filtrados = produtos.filter(p => {
         const nomeOk = p.nome.toLowerCase().includes(termo);
         const skuOk = p.sku.toLowerCase().includes(termo);
@@ -47,24 +46,107 @@ async function buscarProduto() {
                 <div class="produto-nome">${p.nome}</div>
                 <div class="produto-cat">${p.categoria} — Disponível: ${p.disponivel ?? p.quantidade}</div>
             </div>
-            <button class="btn-add" onclick="adicionarItem(${p.id}, '${p.nome}', '${p.sku}', '${p.categoria}', ${p.disponivel ?? p.quantidade})">
+            <button class="btn-add" onclick="abrirSeletorLote(${p.id}, '${p.nome}', '${p.sku}', '${p.categoria}', ${p.disponivel ?? p.quantidade})">
                 + Adicionar
             </button>
         </div>
     `).join("");
 }
 
-function adicionarItem(id, nome, sku, categoria, estoque) {
-    const jaExiste = itens.find(i => i.produto_id === id);
-
+async function abrirSeletorLote(produto_id, nome, sku, categoria, estoque) {
+    const jaExiste = itens.find(i => i.produto_id === produto_id);
     if (jaExiste) {
         showToast("Produto já adicionado!", "erro");
         return;
     }
 
-    itens.push({ produto_id: id, nome, sku, categoria, estoque, quantidade: 1 });
+    const resposta = await fetch(`${API}/produtos/${produto_id}/lotes`);
+    const lotes = await resposta.json();
+    const selecionaveis = lotes.filter(l => l.disponivel > 0 && l.pode_solicitar);
+    const indisponiveis = lotes.filter(l => l.disponivel > 0 && !l.pode_solicitar);
+
+    if (selecionaveis.length === 0 && indisponiveis.length === 0) {
+        showToast("Nenhum lote disponível para este produto!", "erro");
+        return;
+    }
+
+    document.getElementById("loteProdutoId").value = produto_id;
+    document.getElementById("loteNome").textContent = nome;
+    document.getElementById("loteSku").textContent = sku;
+    document.getElementById("loteCategoria").textContent = categoria;
+
+    document.getElementById("listaLotes").innerHTML = [
+        ...selecionaveis.map(l => `
+            <div class="lote-row" data-id="${l.id}" data-codigo="${l.codigo}" data-disponivel="${l.disponivel}">
+                <label class="lote-row-check">
+                    <input type="checkbox" class="lote-checkbox" onchange="atualizarContagem()"/>
+                </label>
+                <div class="lote-row-info">
+                    <span class="lote-row-codigo">${l.codigo}</span>
+                </div>
+                <span class="lote-row-qtd">${l.disponivel} m</span>
+                <span class="lote-row-data">${l.data_entrada || '—'}</span>
+            </div>
+        `),
+        ...indisponiveis.map(l => `
+            <div class="lote-row" style="opacity:0.5;">
+                <label class="lote-row-check">
+                    <input type="checkbox" disabled/>
+                </label>
+                <div class="lote-row-info">
+                    <span class="lote-row-codigo">${l.codigo}</span>
+                    <span style="font-size:0.7rem; color:var(--danger); font-weight:600;">Já utilizado</span>
+                </div>
+                <span class="lote-row-qtd">${l.disponivel} m</span>
+                <span class="lote-row-data">${l.data_entrada || '—'}</span>
+            </div>
+        `)
+    ].join("");
+
+    document.getElementById("loteCount").textContent = "0";
+    document.getElementById("modalLote").classList.add("show");
+}
+
+function atualizarContagem() {
+    const checks = document.querySelectorAll(".lote-checkbox:checked");
+    document.getElementById("loteCount").textContent = checks.length;
+}
+
+function confirmarSelecaoLote() {
+    const produto_id = parseInt(document.getElementById("loteProdutoId").value);
+    const rows = document.querySelectorAll(".lote-row");
+
+    let adicionados = 0;
+
+    rows.forEach(row => {
+        const checkbox = row.querySelector(".lote-checkbox");
+        if (!checkbox.checked) return;
+
+        const lote_id = parseInt(row.dataset.id);
+        const lote_codigo = row.dataset.codigo;
+        const disponivel = parseInt(row.dataset.disponivel);
+
+        itens.push({
+            produto_id,
+            nome: document.getElementById("loteNome").textContent,
+            sku: document.getElementById("loteSku").textContent,
+            categoria: document.getElementById("loteCategoria").textContent,
+            estoque: disponivel,
+            lote_id,
+            lote_codigo,
+            quantidade: 1
+        });
+        adicionados++;
+    });
+
+    if (adicionados === 0) {
+        showToast("Selecione ao menos um lote!", "erro");
+        return;
+    }
+
+    document.getElementById("modalLote").classList.remove("show");
     renderTabela();
-    showToast(`${nome} adicionado!`, "sucesso");
+    showToast(`${adicionados} lote(s) adicionado(s)!`, "sucesso");
 }
 
 function filtrarModal() {
@@ -79,9 +161,9 @@ function filtrarModal() {
             <div class="produto-info">
                 <div class="produto-sku">${p.sku}</div>
                 <div class="produto-nome">${p.nome}</div>
-                <div class="produto-cat">${p.categoria} — Disponível: ${p.disponivel ?? p.quantidade} — Lote: ${p.lote}</div>
+                <div class="produto-cat">${p.categoria} — Disponível: ${p.disponivel ?? p.quantidade}</div>
             </div>
-            <button class="btn-add" onclick="adicionarItem(${p.id}, '${p.nome}', '${p.sku}', '${p.categoria}', ${p.disponivel ?? p.quantidade})">
+            <button class="btn-add" onclick="abrirSeletorLote(${p.id}, '${p.nome}', '${p.sku}', '${p.categoria}', ${p.disponivel ?? p.quantidade})">
                 + Adicionar
             </button>
         </div>
@@ -117,18 +199,24 @@ async function confirmarEnvio() {
     const usuario = JSON.parse(localStorage.getItem("usuario"));
 
     for (const item of itens) {
-        await fetch(`${API}/solicitacoes`, {
+        const res = await fetch(`${API}/solicitacoes`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 usuario_id: usuario.id,
                 produto_id: item.produto_id,
+                lote_id: item.lote_id,
                 quantidade: item.quantidade,
                 motivo: motivo,
-                observacoes: observacoes, // ← adicionado
+                observacoes: observacoes,
                 prioridade: "normal"
             })
         });
+        const data = await res.json();
+        if (data.Mensagem && data.Mensagem.includes("insuficiente")) {
+            alert(`Erro: ${data.Mensagem}`);
+            return;
+        }
     }
 
     alert("Solicitação enviada com sucesso!");
@@ -140,14 +228,14 @@ async function confirmarEnvio() {
 }
 
 function renderTabela() {
-    localStorage.setItem("itensSolicitacao", JSON.stringify(itens)); // ← adiciona essa linha
+    localStorage.setItem("itensSolicitacao", JSON.stringify(itens));
     const tbody = document.getElementById("itensTabela");
     document.getElementById("totalItens").textContent = itens.length;
 
     if (itens.length === 0) {
         tbody.innerHTML = `
             <tr class="empty-row">
-                <td colspan="6">Nenhum item adicionado. Use a busca acima para adicionar produtos.</td>
+                <td colspan="7">Nenhum item adicionado. Use a busca acima para adicionar produtos.</td>
             </tr>`;
         return;
     }
@@ -157,7 +245,7 @@ function renderTabela() {
             <td>${item.sku}</td>
             <td>${item.nome}</td>
             <td>${item.categoria}</td>
-            <td>${item.estoque}</td>
+            <td>${item.lote_codigo || '—'}</td>
             <td>${item.quantidade}</td>
             <td>
                 <button class="btn-recusar" onclick="removerItem(${idx})">✕</button>
@@ -181,6 +269,10 @@ function fecharModalBusca() {
     document.getElementById("modalBusca").style.display = "none";
 }
 
+function fecharModalLote() {
+    document.getElementById("modalLote").classList.remove("show");
+}
+
 function limparFormulario() {
     itens = [];
     localStorage.removeItem("itensSolicitacao");
@@ -195,6 +287,15 @@ function limparFormulario() {
 function logout() {
     localStorage.removeItem("usuario");
     window.location.href = "login.html";
+}
+
+const pending = localStorage.getItem("pendingProduto");
+if (pending) {
+    localStorage.removeItem("pendingProduto");
+    try {
+        const p = JSON.parse(pending);
+        abrirSeletorLote(p.id, p.nome, p.sku, p.categoria, p.estoque);
+    } catch (e) {}
 }
 
 renderTabela();

@@ -145,7 +145,7 @@
               <th>SKU</th>
               <th>Produto</th>
               <th>Categoria</th>
-              <th>Material</th>
+              <th>Lote</th>
               <th style="width:110px">Metragem</th>
               <th style="width:44px"></th>
             </tr>
@@ -256,6 +256,49 @@
 
         <!-- Lista -->
         <div id="listaModal" style="overflow-y:auto; flex:1; padding:12px 16px;"></div>
+    </div>
+</div>
+
+<!-- MODAL SELEÇÃO DE LOTE -->
+<div class="overlay" id="modalLote">
+    <div class="modal-box" style="width:560px; max-height:90vh; padding:0; display:flex; flex-direction:column; overflow:hidden;">
+        <div class="modal-header">
+            <div class="modal-header-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+                    <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+                Selecionar Lotes
+            </div>
+            <button class="modal-close" onclick="fecharModalLote()">✕</button>
+        </div>
+
+        <div style="padding:12px 20px; border-bottom:1px solid var(--border); background:var(--cream); display:flex; gap:16px; flex-wrap:wrap; font-size:0.85rem;">
+            <span><strong>Produto:</strong> <span id="loteNome"></span></span>
+            <span><strong>SKU:</strong> <span id="loteSku"></span></span>
+            <span><strong>Categoria:</strong> <span id="loteCategoria"></span></span>
+        </div>
+
+        <div style="padding:12px 20px; border-bottom:1px solid var(--border); display:flex; gap:16px; font-size:0.78rem; font-weight:600; color:var(--text-muted); text-transform:uppercase;">
+            <span style="width:36px;"></span>
+            <span style="flex:1;">Lote</span>
+            <span style="width:90px; text-align:center;">Disponível</span>
+            <span style="width:100px; text-align:center;">Registrado-em</span>
+        </div>
+
+        <div id="listaLotes" style="overflow-y:auto; flex:1; padding:0 20px 12px;"></div>
+
+        <div style="padding:14px 20px; border-top:1px solid var(--border); background:var(--cream); display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:0.82rem; color:var(--text-muted);">
+                <span id="loteCount">0</span> lote(s) selecionado(s)
+            </span>
+            <input type="hidden" id="loteProdutoId" value=""/>
+            <div style="display:flex; gap:8px;">
+                <button class="btn-cancel" onclick="fecharModalLote()">Cancelar</button>
+                <button class="btn-confirm" onclick="confirmarSelecaoLote()">
+                    + Adicionar à Solicitação
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 

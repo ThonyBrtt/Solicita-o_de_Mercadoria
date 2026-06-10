@@ -10,6 +10,7 @@ document.getElementById("avatarLetra").textContent = usuario.nome.charAt(0).toUp
 let solicitacoes = [];
 let produtos = [];
 let usuarios = [];
+let lotes = [];
 
 async function carregarSolicitacoes() {
     try {
@@ -23,8 +24,8 @@ async function carregarSolicitacoes() {
         produtos     = await resProd.json();
         usuarios     = await resUs.json();
 
-        console.log("Solicitações:", solicitacoes);
-        console.log("Primeiro status:", solicitacoes[0]?.status);
+        const resLotes = await fetch(`${API}/lotes`);
+        lotes = await resLotes.json();
 
         renderKanban();
     } catch (err) {
@@ -32,6 +33,12 @@ async function carregarSolicitacoes() {
         document.getElementById("colPendente").innerHTML = 
             `<div class="kanban-empty">Erro ao carregar solicitações.</div>`;
     }
+}
+
+function getLoteCodigo(lote_id) {
+    if (!lote_id) return "—";
+    const lote = lotes.find(l => l.id === lote_id);
+    return lote ? lote.codigo : "—";
 }
 
 function renderKanban() {
@@ -71,7 +78,7 @@ function renderKanban() {
                 <span class="kanban-id">#${s.id}</span>
                 <span class="kanban-motivo">${s.motivo}</span>
             </div>
-            <div class="kanban-produto">${produto ? produto.nome : "Produto desconhecido"}</div>
+            <div class="kanban-produto">${produto ? `${produto.nome} <span style="font-size:0.72rem; font-weight:400; color:var(--text-muted);">· SKU - ${produto.sku}</span>` : "Produto desconhecido"}</div>
             <div class="kanban-solicitante">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -79,6 +86,7 @@ function renderKanban() {
                 </svg>
                 ${solicitante ? solicitante.nome : "Desconhecido"} · ${s.quantidade} un.
             </div>
+            <div class="kanban-lote">Lote: ${getLoteCodigo(s.lote_id)}</div>
             ${s.observacoes ? `<div class="kanban-obs">"${s.observacoes}"</div>` : ""}
             ${status === "pendente" ? `
             <div class="kanban-actions">

@@ -10,11 +10,7 @@ class ProdutoEntrada(BaseModel):
     quantidade: int
     quantidade_minima: int
     categoria: str
-    lote: int
-    imagem: str = None  # opcional
-
-class AtualizarQuantidadeProduto(BaseModel):
-    quantidade: int
+    imagem: str = None
 
 class ProdutoEdicao(BaseModel):
     nome: str
@@ -22,18 +18,39 @@ class ProdutoEdicao(BaseModel):
     quantidade: int
     quantidade_minima: int
     categoria: str
-    lote: int = 0        # garante default
     imagem: str = None
 
     class Config:
         coerce_numbers_to_str = False
 
 
+def _buscar_produto_com_lotes(id: int, cursor):
+    cursor.execute("""
+        SELECT p.id, p.nome, p.sku, COALESCE(SUM(l.quantidade), 0),
+               p.quantidade_minima, p.categoria, p.imagem,
+               COALESCE(SUM(l.reservado), 0)
+        FROM produtos p
+        LEFT JOIN lotes l ON l.produto_id = p.id AND l.ativo = true
+        WHERE p.id = %s AND p.ativo = true
+        GROUP BY p.id
+    """, (id,))
+    return cursor.fetchone()
+
+
 @router.get("/produtos")
 def listar_produtos():
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, nome, sku, quantidade, quantidade_minima, categoria, lote, imagem, reservado FROM produtos WHERE ativo = true")
+    cursor.execute("""
+        SELECT p.id, p.nome, p.sku, COALESCE(SUM(l.quantidade), 0),
+               p.quantidade_minima, p.categoria, p.imagem,
+               COALESCE(SUM(l.reservado), 0)
+        FROM produtos p
+        LEFT JOIN lotes l ON l.produto_id = p.id AND l.ativo = true
+        WHERE p.ativo = true
+        GROUP BY p.id
+        ORDER BY p.nome
+    """)
     produtos = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -45,10 +62,9 @@ def listar_produtos():
             "quantidade": p[3],
             "quantidade_minima": p[4],
             "categoria": p[5],
-            "lote": p[6],
-            "imagem": p[7],
-            "reservado": p[8],
-            "disponivel": p[3] - p[8]
+            "imagem": p[6],
+            "reservado": p[7],
+            "disponivel": p[3] - p[7]
         }
         for p in produtos
     ]
@@ -57,17 +73,22 @@ def listar_produtos():
 def criar_produto(produto: ProdutoEntrada):
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("""INSERT INTO produtos (nome, sku, quantidade, quantidade_minima, categoria, lote, imagem)
-                   VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id""", (
+    cursor.execute("""INSERT INTO produtos (nome, sku, quantidade_minima, categoria, imagem)
+                   VALUES (%s, %s, %s, %s, %s) RETURNING id""", (
                        produto.nome,
                        produto.sku,
-                       produto.quantidade,
                        produto.quantidade_minima,
                        produto.categoria,
-                       produto.lote,
                        produto.imagem
                    ))
     novo_id = cursor.fetchone()[0]
+
+    if produto.quantidade > 0:
+        cursor.execute(
+            "INSERT INTO lotes (produto_id, codigo, quantidade) VALUES (%s, %s, %s)",
+            (novo_id, "Lote inicial", produto.quantidade)
+        )
+
     conn.commit()
     cursor.close()
     conn.close()
@@ -77,8 +98,7 @@ def criar_produto(produto: ProdutoEntrada):
 def buscar_produto(id: int):
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, nome, sku, quantidade, quantidade_minima, categoria, lote, reservado FROM produtos WHERE id = %s", (id,))
-    produto = cursor.fetchone()
+    produto = _buscar_produto_com_lotes(id, cursor)
     cursor.close()
     conn.close()
 
@@ -92,29 +112,10 @@ def buscar_produto(id: int):
         "quantidade": produto[3],
         "quantidade_minima": produto[4],
         "categoria": produto[5],
-        "lote": produto[6],
+        "imagem": produto[6],
         "reservado": produto[7],
         "disponivel": produto[3] - produto[7]
     }
-
-@router.put("/produtos/{id}/quantidade")
-def atualizar_quantidade(id: int, dados: AtualizarQuantidadeProduto):
-    conn = get_conn()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id FROM produtos WHERE id = %s", (id,))
-    produto = cursor.fetchone()
-
-    if not produto:
-        cursor.close()
-        conn.close()
-        return {"Mensagem": "Produto não encontrado"}
-
-    cursor.execute("UPDATE produtos SET quantidade = %s WHERE id = %s", (dados.quantidade, id))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    
-    return {"Mensagem": "Quantidade atualizada com sucesso"}
 
 @router.patch("/produtos/{id}/desativar")
 def desativar_produto(id: int):
@@ -143,12 +144,12 @@ def editar_produto(id: int, produto: ProdutoEdicao):
         return {"erro": "Produto não encontrado"}
 
     cursor.execute("""UPDATE produtos 
-                   SET nome=%s, sku=%s, quantidade=%s, quantidade_minima=%s, 
-                       categoria=%s, lote=%s, imagem=%s
+                   SET nome=%s, sku=%s, quantidade_minima=%s, 
+                       categoria=%s, imagem=%s
                    WHERE id = %s""",
-                   (produto.nome, produto.sku, produto.quantidade,
+                   (produto.nome, produto.sku,
                     produto.quantidade_minima, produto.categoria,
-                    produto.lote, produto.imagem, id))
+                    produto.imagem, id))
     conn.commit()
     cursor.close()
     conn.close()

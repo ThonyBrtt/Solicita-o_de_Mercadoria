@@ -19,7 +19,7 @@ async function carregarSolicitacoes() {
     if (solicitacoes.length === 0) {
         tbody.innerHTML = `
             <tr class="empty-row">
-                <td colspan="6">Nenhuma solicitação encontrada.</td>
+                <td colspan="7">Nenhuma solicitação encontrada.</td>
             </tr>`;
         return;
     }
@@ -48,6 +48,15 @@ async function carregarSolicitacoes() {
         cancelado: '#ccc'
     };
 
+    const resLotes = await fetch(`${API}/lotes`);
+    const todosLotes = await resLotes.json();
+
+    function getLoteCodigo(lote_id) {
+        if (!lote_id) return "—";
+        const lote = todosLotes.find(l => l.id === lote_id);
+        return lote ? lote.codigo : "—";
+    }
+
     const linhas = await Promise.all(solicitacoes.map(async s => {
         const respostaProduto = await fetch(`${API}/produtos/${s.produto_id}`);
         const produto = await respostaProduto.json();
@@ -61,6 +70,7 @@ async function carregarSolicitacoes() {
                 <td class="sku-cell">#${s.id}</td>
                 <td>${produto.nome}</td>
                 <td>${s.quantidade}</td>
+                <td>${getLoteCodigo(s.lote_id)}</td>
                 <td>${s.motivo}</td>
                 <td>
                     <span style="display:inline-block; padding:3px 9px; border-radius:50px;

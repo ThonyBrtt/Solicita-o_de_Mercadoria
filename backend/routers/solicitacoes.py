@@ -8,6 +8,7 @@ router = APIRouter()
 class SolicitacaoEntrada(BaseModel):
     usuario_id: int
     produto_id: int
+    lote_id: int
     quantidade: int
     motivo: str
     prioridade: str
@@ -22,13 +23,13 @@ def listar_solicitacoes(status: str = None, usuario_id: int = None):
     cursor = conn.cursor()
 
     if status and usuario_id:
-        cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status, observacoes FROM solicitacoes WHERE status = %s AND usuario_id = %s", (status, usuario_id))
+        cursor.execute("SELECT id, usuario_id, produto_id, lote_id, quantidade, motivo, status, observacoes FROM solicitacoes WHERE status = %s AND usuario_id = %s", (status, usuario_id))
     elif usuario_id:
-        cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status, observacoes FROM solicitacoes WHERE usuario_id = %s", (usuario_id,))
+        cursor.execute("SELECT id, usuario_id, produto_id, lote_id, quantidade, motivo, status, observacoes FROM solicitacoes WHERE usuario_id = %s", (usuario_id,))
     elif status:
-        cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status, observacoes FROM solicitacoes WHERE status = %s", (status,))
+        cursor.execute("SELECT id, usuario_id, produto_id, lote_id, quantidade, motivo, status, observacoes FROM solicitacoes WHERE status = %s", (status,))
     else:
-        cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status, observacoes FROM solicitacoes")
+        cursor.execute("SELECT id, usuario_id, produto_id, lote_id, quantidade, motivo, status, observacoes FROM solicitacoes")
 
     solicitacoes = cursor.fetchall()
     cursor.close()
@@ -38,10 +39,11 @@ def listar_solicitacoes(status: str = None, usuario_id: int = None):
             "id": s[0],
             "usuario_id": s[1],
             "produto_id": s[2],
-            "quantidade": s[3],
-            "motivo": s[4],
-            "status": s[5],
-            "observacoes": s[6]
+            "lote_id": s[3],
+            "quantidade": s[4],
+            "motivo": s[5],
+            "status": s[6],
+            "observacoes": s[7]
         }
         for s in solicitacoes
     ]
@@ -50,7 +52,7 @@ def listar_solicitacoes(status: str = None, usuario_id: int = None):
 def buscar_solicitacao(id:int):
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, usuario_id, produto_id, quantidade, motivo, status FROM solicitacoes WHERE id = %s", (id,))
+    cursor.execute("SELECT id, usuario_id, produto_id, lote_id, quantidade, motivo, status FROM solicitacoes WHERE id = %s", (id,))
     solicitacao = cursor.fetchone()
     cursor.close()
     conn.close()
@@ -62,33 +64,39 @@ def buscar_solicitacao(id:int):
         "id": solicitacao[0],
         "usuario_id": solicitacao[1],
         "produto_id": solicitacao[2],
-        "quantidade": solicitacao[3],
-        "motivo": solicitacao[4],
-        "status": solicitacao[5]
+        "lote_id": solicitacao[3],
+        "quantidade": solicitacao[4],
+        "motivo": solicitacao[5],
+        "status": solicitacao[6]
     }
 
 @router.post("/solicitacoes")
 def criar_solicitacao(solicitacao: SolicitacaoEntrada):
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, quantidade, reservado FROM produtos WHERE id = %s",(solicitacao.produto_id, ))
-    produto = cursor.fetchone()
 
-    if not produto:
+    cursor.execute(
+        "SELECT id, quantidade, reservado FROM lotes WHERE id = %s AND ativo = true",
+        (solicitacao.lote_id,)
+    )
+    lote = cursor.fetchone()
+
+    if not lote:
         cursor.close()
         conn.close()
-        return {"Mensagem": "Produto não encontrado"}
-    
-    disponivel = produto[1] - produto[2]
+        return {"Mensagem": "Lote não encontrado ou inativo"}
+
+    disponivel = lote[1] - lote[2]
     if disponivel < solicitacao.quantidade:
         cursor.close()
         conn.close()
-        return {"Mensagem": f"Quantidade insuficiente em estoque. Disponível: {disponivel}"}
+        return {"Mensagem": f"Quantidade insuficiente no lote. Disponível: {disponivel}"}
 
-    cursor.execute("""INSERT INTO solicitacoes (usuario_id, produto_id, quantidade, motivo, observacoes)
-               VALUES (%s, %s, %s, %s, %s) RETURNING id""", (
+    cursor.execute("""INSERT INTO solicitacoes (usuario_id, produto_id, lote_id, quantidade, motivo, observacoes)
+               VALUES (%s, %s, %s, %s, %s, %s) RETURNING id""", (
                solicitacao.usuario_id,
                solicitacao.produto_id,
+               solicitacao.lote_id,
                solicitacao.quantidade,
                solicitacao.motivo,
                solicitacao.observacoes
@@ -112,9 +120,10 @@ def atualizar_solicitacoes( id:int, solicitacao: SolicitacaoEntrada):
         conn.close()
         return {"Mensagem": "Solicitação não encontrada"}
     
-    cursor.execute("UPDATE solicitacoes SET usuario_id = %s, produto_id = %s, quantidade = %s, motivo = %s WHERE id = %s",(
+    cursor.execute("UPDATE solicitacoes SET usuario_id = %s, produto_id = %s, lote_id = %s, quantidade = %s, motivo = %s WHERE id = %s",(
         solicitacao.usuario_id,
         solicitacao.produto_id,
+        solicitacao.lote_id,
         solicitacao.quantidade,
         solicitacao.motivo,
         id
@@ -128,7 +137,7 @@ def atualizar_solicitacoes( id:int, solicitacao: SolicitacaoEntrada):
 def atualizar_status(id:int, status: AtualizarStatus):
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, produto_id, quantidade, status FROM solicitacoes WHERE id = %s", (id,))
+    cursor.execute("SELECT id, produto_id, lote_id, quantidade, status FROM solicitacoes WHERE id = %s", (id,))
     solicitacao = cursor.fetchone()
 
     if not solicitacao:
@@ -136,8 +145,10 @@ def atualizar_status(id:int, status: AtualizarStatus):
         conn.close()
         return {"Mensagem": "Solicitação não encontrada"}
 
-    status_atual = solicitacao[3]
+    status_atual = solicitacao[4]
     novo_status = status.status
+    lote_id = solicitacao[2]
+    qtd = solicitacao[3]
 
     if novo_status == "aprovado":
         if status_atual != "pendente":
@@ -145,18 +156,22 @@ def atualizar_status(id:int, status: AtualizarStatus):
             conn.close()
             return {"Mensagem": "Só é possível aprovar solicitações pendentes"}
 
-        cursor.execute("SELECT quantidade, reservado FROM produtos WHERE id = %s", (solicitacao[1],))
-        produto = cursor.fetchone()
-        disponivel = produto[0] - produto[1]
-
-        if disponivel < solicitacao[2]:
+        cursor.execute("SELECT quantidade, reservado FROM lotes WHERE id = %s", (lote_id,))
+        lote = cursor.fetchone()
+        if not lote:
             cursor.close()
             conn.close()
-            return {"Mensagem": f"Estoque insuficiente para aprovação. Disponível: {disponivel}"}
+            return {"Mensagem": "Lote não encontrado"}
+
+        disponivel = lote[0] - lote[1]
+        if disponivel < qtd:
+            cursor.close()
+            conn.close()
+            return {"Mensagem": f"Estoque insuficiente no lote para aprovação. Disponível: {disponivel}"}
 
         cursor.execute(
-            "UPDATE produtos SET quantidade = quantidade - %s, reservado = reservado + %s WHERE id = %s",
-            (solicitacao[2], solicitacao[2], solicitacao[1])
+            "UPDATE lotes SET quantidade = quantidade - %s, reservado = reservado + %s WHERE id = %s",
+            (qtd, qtd, lote_id)
         )
 
     elif novo_status == "retirado":
@@ -165,15 +180,15 @@ def atualizar_status(id:int, status: AtualizarStatus):
             conn.close()
             return {"Mensagem": "Só é possível retirar solicitações aprovadas"}
         cursor.execute(
-            "UPDATE produtos SET reservado = reservado - %s WHERE id = %s",
-            (solicitacao[2], solicitacao[1])
+            "UPDATE lotes SET reservado = reservado - %s WHERE id = %s",
+            (qtd, lote_id)
         )
 
     elif novo_status == "cancelado":
         if status_atual == "aprovado":
             cursor.execute(
-                "UPDATE produtos SET quantidade = quantidade + %s, reservado = reservado - %s WHERE id = %s",
-                (solicitacao[2], solicitacao[2], solicitacao[1])
+                "UPDATE lotes SET quantidade = quantidade + %s, reservado = reservado - %s WHERE id = %s",
+                (qtd, qtd, lote_id)
             )
         elif status_atual not in ("pendente", "aprovado"):
             cursor.close()

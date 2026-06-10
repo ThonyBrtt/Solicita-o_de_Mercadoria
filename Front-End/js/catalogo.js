@@ -163,7 +163,6 @@ async function carregarProdutos() {
         <div class="modal-field" style="grid-column:1/-1">${imgHtml}</div>
         <div class="modal-field"><label>SKU</label><span>${p.sku}</span></div>
         <div class="modal-field"><label>Categoria</label><span>${p.categoria}</span></div>
-        <div class="modal-field"><label>Material</label><span>${p.material}</span></div>
         <div class="modal-field"><label>Unidade</label><span>${p.unidade}</span></div>
         <div class="modal-field"><label>Total em Estoque</label><span>${p.estoque} ${p.unidade}</span></div>
         <div class="modal-field"><label>Disponível</label><span>${p.disponivel} ${p.unidade}</span></div>
@@ -176,8 +175,32 @@ async function carregarProdutos() {
                   'background:#FDECEA; color:#C0392B; border:1px solid #F5C0BA;'}
             ">${getBadgeLabel(p.status)}</span>
         </div>
+        <div class="modal-field" style="grid-column:1/-1">
+            <label style="font-weight:700;">Lotes Disponíveis</label>
+            <div id="lotesCatalogo" style="margin-top:4px; font-size:0.8rem;"></div>
+        </div>
     `;
     document.getElementById('overlay').classList.add('show');
+
+    fetch(`${API}/produtos/${p.id}/lotes`)
+        .then(r => r.json())
+        .then(lotes => {
+            const div = document.getElementById('lotesCatalogo');
+            const disponiveis = lotes.filter(l => l.disponivel > 0);
+            if (disponiveis.length === 0) {
+                div.innerHTML = '<span style="color:var(--text-muted);">Nenhum lote disponível no momento.</span>';
+                return;
+            }
+            div.innerHTML = disponiveis.map(l => `
+                <div style="display:flex; justify-content:space-between; padding:4px 6px;
+                    border:1px solid var(--border); border-radius:4px; margin-bottom:3px;">
+                    <span><strong>${l.codigo}</strong></span>
+                    <span>${l.disponivel} m</span>
+                    <span style="color:var(--text-muted);">${l.data_entrada || '—'}</span>
+                </div>
+            `).join("");
+        })
+        .catch(() => {});
 }
 
     function fecharModal() {
@@ -197,19 +220,17 @@ async function carregarProdutos() {
         return;
     }
 
-    itensExistentes.push({
-        produto_id: produtoSelecionado.id,
+    localStorage.setItem("pendingProduto", JSON.stringify({
+        id: produtoSelecionado.id,
         nome: produtoSelecionado.nome,
         sku: produtoSelecionado.sku,
         categoria: produtoSelecionado.categoria,
-        estoque: produtoSelecionado.disponivel,
-        quantidade: 1
-    });
+        estoque: produtoSelecionado.disponivel
+    }));
 
-    localStorage.setItem("itensSolicitacao", JSON.stringify(itensExistentes));
-    showToast(`${produtoSelecionado.nome} adicionado à solicitação!`);
+    showToast("Selecione o lote desejado...");
     fecharModal();
-    setTimeout(() => { window.location.href = "home.html"; }, 1200);
+    setTimeout(() => { window.location.href = "home.html"; }, 300);
 }
 
     function showToast(msg) {

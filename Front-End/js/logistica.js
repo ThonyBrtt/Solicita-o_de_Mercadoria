@@ -138,10 +138,6 @@ async function carregarDashboard() {
         document.getElementById("dRetiradas").textContent  = `${d.taxas.pct_retirada}%`;
         document.getElementById("dCanceladas").textContent = `${d.taxas.pct_cancelamento}%`;
 
-        // Tempo médio
-        document.getElementById("dTempo").textContent = d.tempo_medio_horas
-            ? `${d.tempo_medio_horas}h` : "—";
-
         // Top produtos
         document.getElementById("topProdutos").innerHTML = d.top_produtos.map((p, i) => `
             <div class="rank-item">

@@ -31,13 +31,6 @@ def get_dashboard():
     taxas = cursor.fetchone()
 
     cursor.execute("""
-        SELECT ROUND(AVG(EXTRACT(EPOCH FROM (atualizado_em - criado_em)) / 3600)::numeric, 1)
-        FROM solicitacoes
-        WHERE status IN ('aprovado', 'recusado', 'retirado', 'cancelado') AND atualizado_em IS NOT NULL
-    """)
-    tempo_medio = cursor.fetchone()[0]
-
-    cursor.execute("""
         SELECT p.nome, COUNT(s.id) as total
         FROM solicitacoes s
         JOIN produtos p ON p.id = s.produto_id
@@ -80,7 +73,6 @@ def get_dashboard():
             "pct_retirada": round((taxas[3] / total) * 100, 1),
             "pct_cancelamento": round((taxas[4] / total) * 100, 1)
         },
-        "tempo_medio_horas": tempo_medio or 0,
         "top_produtos": [{"nome": r[0], "total": r[1]} for r in top_produtos],
         "top_usuarios": [{"nome": r[0], "total": r[1]} for r in top_usuarios]
     }

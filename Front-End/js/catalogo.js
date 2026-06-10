@@ -186,19 +186,43 @@ async function carregarProdutos() {
         .then(r => r.json())
         .then(lotes => {
             const div = document.getElementById('lotesCatalogo');
-            const disponiveis = lotes.filter(l => l.disponivel > 0);
-            if (disponiveis.length === 0) {
-                div.innerHTML = '<span style="color:var(--text-muted);">Nenhum lote disponível no momento.</span>';
+            const disponiveis = lotes.filter(l => l.disponivel > 0 && l.pode_solicitar);
+            const indisponiveis = lotes.filter(l => l.disponivel > 0 && !l.pode_solicitar);
+            const semEstoque = lotes.filter(l => l.disponivel <= 0);
+
+            if (lotes.length === 0) {
+                div.innerHTML = '<span style="color:var(--text-muted);">Nenhum lote cadastrado.</span>';
                 return;
             }
-            div.innerHTML = disponiveis.map(l => `
-                <div style="display:flex; justify-content:space-between; padding:4px 6px;
-                    border:1px solid var(--border); border-radius:4px; margin-bottom:3px;">
-                    <span><strong>${l.codigo}</strong></span>
-                    <span>${l.disponivel} m</span>
-                    <span style="color:var(--text-muted);">${l.data_entrada || '—'}</span>
-                </div>
-            `).join("");
+
+            const html = [
+                ...disponiveis.map(l => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 6px;
+                        border:1px solid var(--border); border-radius:4px; margin-bottom:3px;">
+                        <span><strong>${l.codigo}</strong></span>
+                        <span style="color:var(--gold); font-weight:600;">${l.disponivel} m</span>
+                        <span style="color:var(--text-muted); font-size:0.75rem;">${l.data_entrada || '—'}</span>
+                    </div>
+                `),
+                ...indisponiveis.map(l => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 6px;
+                        border:1px solid var(--border); border-radius:4px; margin-bottom:3px; opacity:0.5;">
+                        <span><strong>${l.codigo}</strong></span>
+                        <span style="color:var(--danger); font-weight:600; font-size:0.7rem;">Indisponível</span>
+                        <span style="color:var(--text-muted); font-size:0.75rem;">${l.data_entrada || '—'}</span>
+                    </div>
+                `),
+                ...semEstoque.map(l => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 6px;
+                        border:1px solid var(--border); border-radius:4px; margin-bottom:3px; opacity:0.4;">
+                        <span><strong>${l.codigo}</strong></span>
+                        <span style="color:var(--danger); font-weight:600; font-size:0.7rem;">Sem estoque</span>
+                        <span style="color:var(--text-muted); font-size:0.75rem;">${l.data_entrada || '—'}</span>
+                    </div>
+                `)
+            ].join("");
+
+            div.innerHTML = html;
         })
         .catch(() => {});
 }

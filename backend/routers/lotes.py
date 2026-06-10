@@ -62,7 +62,7 @@ def listar_lotes(produto_id: int, ativos: bool = True):
         disponivel = l[2] - l[3]
 
         cursor.execute(
-            "SELECT COUNT(*) FROM solicitacoes WHERE lote_id = %s AND status IN ('pendente', 'aprovado')",
+            "SELECT COUNT(*) FROM solicitacoes WHERE lote_id = %s AND status IN ('pendente', 'aprovado', 'retirado')",
             (lote_id,)
         )
         count_solicitacoes = cursor.fetchone()[0]

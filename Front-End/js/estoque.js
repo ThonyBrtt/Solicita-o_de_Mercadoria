@@ -11,8 +11,9 @@ let produtos = [];
 let viewAtual = 'grid';
 
 function getStatus(p) {
-    if (p.quantidade === 0) return "sem";
-    if (p.quantidade <= p.quantidade_minima) return "baixo";
+    const disp = (p.disponivel !== undefined) ? p.disponivel : p.quantidade;
+    if (disp <= 0) return "sem";
+    if (disp <= p.quantidade_minima) return "baixo";
     return "ok";
 }
 
@@ -57,7 +58,7 @@ function renderGrid() {
             <div class="produto-card-cat">${p.categoria} · ${p.lote}</div>
             <div class="produto-card-footer">
                 <div class="estoque-info">
-                    <strong>${p.quantidade} m</strong><br>em estoque
+                    <strong>${p.disponivel ?? p.quantidade} m</strong><br>disponível
                 </div>
                 <button class="btn-recusar" onclick="event.stopPropagation(); excluirProduto(${p.id})">✕</button>
             </div>
@@ -71,18 +72,21 @@ function renderLista() {
     const tbody = document.getElementById("tabelaLista");
 
     if (produtos.length === 0) {
-        tbody.innerHTML = `<tr class="empty-row"><td colspan="8">Nenhum produto cadastrado.</td></tr>`;
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="10">Nenhum produto cadastrado.</td></tr>`;
         return;
     }
 
     tbody.innerHTML = produtos.map(p => {
         const status = getStatus(p);
+        const disponivel = (p.disponivel !== undefined) ? p.disponivel : p.quantidade;
         return `
             <tr>
                 <td class="sku-cell">${p.sku}</td>
                 <td><strong>${p.nome}</strong></td>
                 <td>${p.categoria}</td>
                 <td>${p.quantidade} m</td>
+                <td>${p.reservado || 0} m</td>
+                <td>${disponivel} m</td>
                 <td>${p.quantidade_minima}</td>
                 <td>${p.lote}</td>
                 <td>
@@ -214,6 +218,14 @@ function abrirModal(idx) {
         <div class="modal-field">
             <label>Quantidade Mínima</label>
             <input type="number" class="input-base" id="editQuantidadeMinima" value="${p.quantidade_minima}" min="0"/>
+        </div>
+        <div class="modal-field">
+            <label>Reservado</label>
+            <input type="text" class="input-base" value="${p.reservado || 0} m" disabled style="opacity:0.7"/>
+        </div>
+        <div class="modal-field">
+            <label>Disponível</label>
+            <input type="text" class="input-base" value="${p.disponivel ?? p.quantidade} m" disabled style="opacity:0.7"/>
         </div>
         <div class="modal-field">
             <label>Lote</label>

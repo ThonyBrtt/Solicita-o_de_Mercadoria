@@ -38,7 +38,9 @@ function renderKanban() {
     const colunas = {
         pendente:  document.getElementById("colPendente"),
         aprovado:  document.getElementById("colAprovado"),
-        recusado:  document.getElementById("colRecusado")
+        retirado:  document.getElementById("colRetirado"),
+        recusado:  document.getElementById("colRecusado"),
+        cancelado: document.getElementById("colCancelado")
     };
 
     // Limpa e zera contadores
@@ -82,7 +84,13 @@ function renderKanban() {
             <div class="kanban-actions">
                 <button class="btn-aprovar" onclick="atualizarStatus(${s.id}, 'aprovado')">✔ Aprovar</button>
                 <button class="btn-recusar" onclick="atualizarStatus(${s.id}, 'recusado')">✘ Recusar</button>
+            </div>` : status === "aprovado" ? `
+            <div class="kanban-actions">
+                <button class="btn-aprovar" onclick="atualizarStatus(${s.id}, 'retirado')">📦 Confirmar Retirada</button>
+                <button class="btn-recusar" onclick="atualizarStatus(${s.id}, 'cancelado')">✕ Cancelar</button>
             </div>` : ""}
+            ${status === "retirado" ? `
+            <div class="kanban-obs" style="color: var(--success); font-weight: 600;">✓ Retirado</div>` : ""}
         `;
         col.appendChild(card);
     });
@@ -127,6 +135,8 @@ async function carregarDashboard() {
         document.getElementById("dAprovadas").textContent  = `${d.taxas.pct_aprovacao}%`;
         document.getElementById("dRecusadas").textContent  = `${d.taxas.pct_recusa}%`;
         document.getElementById("dPendentes").textContent  = d.taxas.pendentes;
+        document.getElementById("dRetiradas").textContent  = `${d.taxas.pct_retirada}%`;
+        document.getElementById("dCanceladas").textContent = `${d.taxas.pct_cancelamento}%`;
 
         // Tempo médio
         document.getElementById("dTempo").textContent = d.tempo_medio_horas

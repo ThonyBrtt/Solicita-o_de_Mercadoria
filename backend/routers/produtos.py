@@ -33,7 +33,7 @@ class ProdutoEdicao(BaseModel):
 def listar_produtos():
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, nome, sku, quantidade, quantidade_minima, categoria, lote, imagem FROM produtos WHERE ativo = true")
+    cursor.execute("SELECT id, nome, sku, quantidade, quantidade_minima, categoria, lote, imagem, reservado FROM produtos WHERE ativo = true")
     produtos = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -46,7 +46,9 @@ def listar_produtos():
             "quantidade_minima": p[4],
             "categoria": p[5],
             "lote": p[6],
-            "imagem": p[7]
+            "imagem": p[7],
+            "reservado": p[8],
+            "disponivel": p[3] - p[8]
         }
         for p in produtos
     ]
@@ -75,7 +77,7 @@ def criar_produto(produto: ProdutoEntrada):
 def buscar_produto(id: int):
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, nome, sku, quantidade, quantidade_minima, categoria, lote FROM produtos WHERE id = %s", (id,))
+    cursor.execute("SELECT id, nome, sku, quantidade, quantidade_minima, categoria, lote, reservado FROM produtos WHERE id = %s", (id,))
     produto = cursor.fetchone()
     cursor.close()
     conn.close()
@@ -90,7 +92,9 @@ def buscar_produto(id: int):
         "quantidade": produto[3],
         "quantidade_minima": produto[4],
         "categoria": produto[5],
-        "lote": produto[6]
+        "lote": produto[6],
+        "reservado": produto[7],
+        "disponivel": produto[3] - produto[7]
     }
 
 @router.put("/produtos/{id}/quantidade")

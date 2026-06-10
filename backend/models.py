@@ -18,6 +18,7 @@ def criar_tabelas():
                 sku VARCHAR(50) UNIQUE NOT NULL,
                 quantidade INTEGER NOT NULL DEFAULT 0,
                 quantidade_minima INTEGER NOT NULL DEFAULT 0,
+                reservado INTEGER NOT NULL DEFAULT 0,
                 categoria VARCHAR(100) NOT NULL,
                 lote INT,
                 ativo BOOLEAN NOT NULL DEFAULT true,
@@ -36,6 +37,8 @@ def criar_tabelas():
                    observacoes TEXT,
                    atualizado_em TIMESTAMP
                    )""")
+
+    cursor.execute("ALTER TABLE produtos ADD COLUMN IF NOT EXISTS reservado INTEGER NOT NULL DEFAULT 0")
 
     conn.commit()
     cursor.close()

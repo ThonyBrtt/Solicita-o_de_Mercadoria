@@ -15,7 +15,6 @@ async function carregarProdutos() {
     const resposta = await fetch(`${API}/produtos`);
     const dados = await resposta.json();
 
-    // Mapeia os dados do banco para o formato que o catálogo usa
     produtos = dados.map(p => ({
     id: p.id,
     sku: p.sku,
@@ -23,9 +22,11 @@ async function carregarProdutos() {
     categoria: p.categoria,
     material: p.lote,
     estoque: p.quantidade,
+    reservado: p.reservado,
+    disponivel: p.disponivel,
     unidade: 'm',
-    imagem: p.imagem ?? null, // ← adiciona isso
-    status: p.quantidade === 0 ? 'sem' : p.quantidade <= p.quantidade_minima ? 'baixo' : 'ok'
+    imagem: p.imagem ?? null,
+    status: p.disponivel <= 0 ? 'sem' : p.disponivel <= p.quantidade_minima ? 'baixo' : 'ok'
 }));
 
     produtosFiltrados = [...produtos];
@@ -69,7 +70,7 @@ async function carregarProdutos() {
                     <div class="produto-card-cat">${p.categoria} · ${p.material}</div>
                     <div class="produto-card-footer">
                         <div class="estoque-info">
-                            <strong>${p.estoque} ${p.unidade}</strong><br>em estoque
+                            <strong>${p.disponivel} ${p.unidade}</strong><br>disponível
                         </div>
                         <button class="btn-ver" onclick="event.stopPropagation(); abrirModal(${produtos.indexOf(p)})">Ver</button>
                     </div>
@@ -91,7 +92,7 @@ async function carregarProdutos() {
             <td><strong>${p.nome}</strong></td>
             <td>${p.categoria}</td>
             <td>${p.material}</td>
-            <td>${p.estoque} ${p.unidade}</td>
+            <td>${p.disponivel} ${p.unidade}</td>
             <td>
                 <span style="
                     display:inline-block;
@@ -164,7 +165,8 @@ async function carregarProdutos() {
         <div class="modal-field"><label>Categoria</label><span>${p.categoria}</span></div>
         <div class="modal-field"><label>Material</label><span>${p.material}</span></div>
         <div class="modal-field"><label>Unidade</label><span>${p.unidade}</span></div>
-        <div class="modal-field"><label>Em Estoque</label><span>${p.estoque} ${p.unidade}</span></div>
+        <div class="modal-field"><label>Total em Estoque</label><span>${p.estoque} ${p.unidade}</span></div>
+        <div class="modal-field"><label>Disponível</label><span>${p.disponivel} ${p.unidade}</span></div>
         <div class="modal-field"><label>Status</label>
             <span style="
                 display:inline-block; padding:3px 9px; border-radius:50px;
@@ -200,7 +202,7 @@ async function carregarProdutos() {
         nome: produtoSelecionado.nome,
         sku: produtoSelecionado.sku,
         categoria: produtoSelecionado.categoria,
-        estoque: produtoSelecionado.estoque,
+        estoque: produtoSelecionado.disponivel,
         quantidade: 1
     });
 

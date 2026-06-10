@@ -26,7 +26,7 @@ async function buscarProduto() {
     );
 
     if (exato) {
-        adicionarItem(exato.id, exato.nome, exato.sku, exato.categoria, exato.quantidade);
+        adicionarItem(exato.id, exato.nome, exato.sku, exato.categoria, exato.disponivel ?? exato.quantidade);
         document.getElementById("buscaProduto").value = "";
         document.getElementById("resultadoBusca").innerHTML = "";
         return;
@@ -45,9 +45,9 @@ async function buscarProduto() {
             <div class="produto-info">
                 <div class="produto-sku">${p.sku}</div>
                 <div class="produto-nome">${p.nome}</div>
-                <div class="produto-cat">${p.categoria} — Estoque: ${p.quantidade}</div>
+                <div class="produto-cat">${p.categoria} — Disponível: ${p.disponivel ?? p.quantidade}</div>
             </div>
-            <button class="btn-add" onclick="adicionarItem(${p.id}, '${p.nome}', '${p.sku}', '${p.categoria}', ${p.quantidade})">
+            <button class="btn-add" onclick="adicionarItem(${p.id}, '${p.nome}', '${p.sku}', '${p.categoria}', ${p.disponivel ?? p.quantidade})">
                 + Adicionar
             </button>
         </div>
@@ -79,9 +79,9 @@ function filtrarModal() {
             <div class="produto-info">
                 <div class="produto-sku">${p.sku}</div>
                 <div class="produto-nome">${p.nome}</div>
-                <div class="produto-cat">${p.categoria} — Estoque: ${p.quantidade} — Lote: ${p.lote}</div>
+                <div class="produto-cat">${p.categoria} — Disponível: ${p.disponivel ?? p.quantidade} — Lote: ${p.lote}</div>
             </div>
-            <button class="btn-add" onclick="adicionarItem(${p.id}, '${p.nome}', '${p.sku}', '${p.categoria}', ${p.quantidade})">
+            <button class="btn-add" onclick="adicionarItem(${p.id}, '${p.nome}', '${p.sku}', '${p.categoria}', ${p.disponivel ?? p.quantidade})">
                 + Adicionar
             </button>
         </div>

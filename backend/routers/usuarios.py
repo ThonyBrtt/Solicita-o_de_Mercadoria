@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from database import get_conn
 from pydantic import BaseModel
 from enum import Enum
+from utils import hash_senha, verificar_senha
 
 router = APIRouter()
 
@@ -24,7 +25,7 @@ class LoginEntrada(BaseModel):
 def listar_usuarios():
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, nome, usuario, perfil, senha FROM usuarios")
+    cursor.execute("SELECT id, nome, usuario, perfil FROM usuarios")
     usuarios = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -33,21 +34,22 @@ def listar_usuarios():
             "id": u[0],
             "nome": u[1],
             "usuario": u[2],
-            "perfil": u[3],
-            "senha": u[4]
+            "perfil": u[3]
         }
         for u in usuarios
     ]
+
 
 @router.post("/usuarios")
 def criar_usuario(usuario: UsuarioEntrada):
     conn = get_conn()
     cursor = conn.cursor()
+    senha_hash = hash_senha(usuario.senha)
     cursor.execute("""INSERT INTO usuarios (nome, usuario, senha, perfil) 
                    VALUES (%s, %s, %s, %s) RETURNING id""",(
                        usuario.nome,
                        usuario.usuario,
-                       usuario.senha,
+                       senha_hash,
                        usuario.perfil
                    ))
     novo_id = cursor.fetchone()[0]
@@ -68,10 +70,11 @@ def atualizar_usuario(id: int, usuario: UsuarioEntrada):
         conn.close()
         return {"Mensagem": "Usuário Não encontrado"}
     
+    senha_hash = hash_senha(usuario.senha)
     cursor.execute("UPDATE usuarios SET nome = %s, usuario = %s, senha = %s, perfil = %s WHERE id = %s", (
         usuario.nome,
         usuario.usuario,
-        usuario.senha,
+        senha_hash,
         usuario.perfil,
         id
     ))
@@ -87,16 +90,18 @@ def login(dados: LoginEntrada):
     cursor = conn.cursor()
     
     cursor.execute(
-        "SELECT id, nome, usuario, perfil FROM usuarios WHERE usuario = %s AND senha = %s",
-        (dados.usuario, dados.senha)
+        "SELECT id, nome, usuario, perfil, senha FROM usuarios WHERE usuario = %s",
+        (dados.usuario,)
     )
     usuario = cursor.fetchone()
     
+    if not usuario or not verificar_senha(dados.senha, usuario[4]):
+        cursor.close()
+        conn.close()
+        return {"erro": "Usuário ou senha incorretos"}
+    
     cursor.close()
     conn.close()
-    
-    if not usuario:
-        return {"erro": "Usuário ou senha incorretos"}
     
     return {
         "id": usuario[0],

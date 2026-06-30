@@ -15,7 +15,6 @@ async function carregarProdutos() {
     const resposta = await fetch(`${API}/produtos`);
     const dados = await resposta.json();
 
-    // Mapeia os dados do banco para o formato que o catálogo usa
     produtos = dados.map(p => ({
     id: p.id,
     sku: p.sku,
@@ -23,9 +22,11 @@ async function carregarProdutos() {
     categoria: p.categoria,
     material: p.lote,
     estoque: p.quantidade,
+    reservado: p.reservado,
+    disponivel: p.disponivel,
     unidade: 'm',
-    imagem: p.imagem ?? null, // ← adiciona isso
-    status: p.quantidade === 0 ? 'sem' : p.quantidade <= p.quantidade_minima ? 'baixo' : 'ok'
+    imagem: p.imagem ?? null,
+    status: p.disponivel <= 0 ? 'sem' : p.disponivel <= p.quantidade_minima ? 'baixo' : 'ok'
 }));
 
     produtosFiltrados = [...produtos];
@@ -69,7 +70,7 @@ async function carregarProdutos() {
                     <div class="produto-card-cat">${p.categoria} · ${p.material}</div>
                     <div class="produto-card-footer">
                         <div class="estoque-info">
-                            <strong>${p.estoque} ${p.unidade}</strong><br>em estoque
+                            <strong>${p.disponivel} ${p.unidade}</strong><br>disponível
                         </div>
                         <button class="btn-ver" onclick="event.stopPropagation(); abrirModal(${produtos.indexOf(p)})">Ver</button>
                     </div>
@@ -91,7 +92,7 @@ async function carregarProdutos() {
             <td><strong>${p.nome}</strong></td>
             <td>${p.categoria}</td>
             <td>${p.material}</td>
-            <td>${p.estoque} ${p.unidade}</td>
+            <td>${p.disponivel} ${p.unidade}</td>
             <td>
                 <span style="
                     display:inline-block;
@@ -162,9 +163,9 @@ async function carregarProdutos() {
         <div class="modal-field" style="grid-column:1/-1">${imgHtml}</div>
         <div class="modal-field"><label>SKU</label><span>${p.sku}</span></div>
         <div class="modal-field"><label>Categoria</label><span>${p.categoria}</span></div>
-        <div class="modal-field"><label>Material</label><span>${p.material}</span></div>
         <div class="modal-field"><label>Unidade</label><span>${p.unidade}</span></div>
-        <div class="modal-field"><label>Em Estoque</label><span>${p.estoque} ${p.unidade}</span></div>
+        <div class="modal-field"><label>Total em Estoque</label><span>${p.estoque} ${p.unidade}</span></div>
+        <div class="modal-field"><label>Disponível</label><span>${p.disponivel} ${p.unidade}</span></div>
         <div class="modal-field"><label>Status</label>
             <span style="
                 display:inline-block; padding:3px 9px; border-radius:50px;
@@ -174,8 +175,56 @@ async function carregarProdutos() {
                   'background:#FDECEA; color:#C0392B; border:1px solid #F5C0BA;'}
             ">${getBadgeLabel(p.status)}</span>
         </div>
+        <div class="modal-field" style="grid-column:1/-1">
+            <label style="font-weight:700;">Lotes Disponíveis</label>
+            <div id="lotesCatalogo" style="margin-top:4px; font-size:0.8rem;"></div>
+        </div>
     `;
     document.getElementById('overlay').classList.add('show');
+
+    fetch(`${API}/produtos/${p.id}/lotes`)
+        .then(r => r.json())
+        .then(lotes => {
+            const div = document.getElementById('lotesCatalogo');
+            const disponiveis = lotes.filter(l => l.disponivel > 0 && l.pode_solicitar);
+            const indisponiveis = lotes.filter(l => l.disponivel > 0 && !l.pode_solicitar);
+            const semEstoque = lotes.filter(l => l.disponivel <= 0);
+
+            if (lotes.length === 0) {
+                div.innerHTML = '<span style="color:var(--text-muted);">Nenhum lote cadastrado.</span>';
+                return;
+            }
+
+            const html = [
+                ...disponiveis.map(l => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 6px;
+                        border:1px solid var(--border); border-radius:4px; margin-bottom:3px;">
+                        <span><strong>${l.codigo}</strong></span>
+                        <span style="color:var(--gold); font-weight:600;">${l.disponivel} m</span>
+                        <span style="color:var(--text-muted); font-size:0.75rem;">${l.data_entrada || '—'}</span>
+                    </div>
+                `),
+                ...indisponiveis.map(l => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 6px;
+                        border:1px solid var(--border); border-radius:4px; margin-bottom:3px; opacity:0.5;">
+                        <span><strong>${l.codigo}</strong></span>
+                        <span style="color:var(--danger); font-weight:600; font-size:0.7rem;">Indisponível</span>
+                        <span style="color:var(--text-muted); font-size:0.75rem;">${l.data_entrada || '—'}</span>
+                    </div>
+                `),
+                ...semEstoque.map(l => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 6px;
+                        border:1px solid var(--border); border-radius:4px; margin-bottom:3px; opacity:0.4;">
+                        <span><strong>${l.codigo}</strong></span>
+                        <span style="color:var(--danger); font-weight:600; font-size:0.7rem;">Sem estoque</span>
+                        <span style="color:var(--text-muted); font-size:0.75rem;">${l.data_entrada || '—'}</span>
+                    </div>
+                `)
+            ].join("");
+
+            div.innerHTML = html;
+        })
+        .catch(() => {});
 }
 
     function fecharModal() {
@@ -195,19 +244,17 @@ async function carregarProdutos() {
         return;
     }
 
-    itensExistentes.push({
-        produto_id: produtoSelecionado.id,
+    localStorage.setItem("pendingProduto", JSON.stringify({
+        id: produtoSelecionado.id,
         nome: produtoSelecionado.nome,
         sku: produtoSelecionado.sku,
         categoria: produtoSelecionado.categoria,
-        estoque: produtoSelecionado.estoque,
-        quantidade: 1
-    });
+        estoque: produtoSelecionado.disponivel
+    }));
 
-    localStorage.setItem("itensSolicitacao", JSON.stringify(itensExistentes));
-    showToast(`${produtoSelecionado.nome} adicionado à solicitação!`);
+    showToast("Selecione o lote desejado...");
     fecharModal();
-    setTimeout(() => { window.location.href = "home.html"; }, 1200);
+    setTimeout(() => { window.location.href = "home.html"; }, 300);
 }
 
     function showToast(msg) {

@@ -23,17 +23,12 @@ def get_dashboard():
             COUNT(*) FILTER (WHERE status = 'aprovado') as aprovadas,
             COUNT(*) FILTER (WHERE status = 'recusado') as recusadas,
             COUNT(*) FILTER (WHERE status = 'pendente') as pendentes,
+            COUNT(*) FILTER (WHERE status = 'retirado') as retiradas,
+            COUNT(*) FILTER (WHERE status = 'cancelado') as canceladas,
             COUNT(*) as total
         FROM solicitacoes
     """)
     taxas = cursor.fetchone()
-
-    cursor.execute("""
-        SELECT ROUND(AVG(EXTRACT(EPOCH FROM (atualizado_em - criado_em)) / 3600)::numeric, 1)
-        FROM solicitacoes
-        WHERE status IN ('aprovado', 'recusado') AND atualizado_em IS NOT NULL
-    """)
-    tempo_medio = cursor.fetchone()[0]
 
     cursor.execute("""
         SELECT p.nome, COUNT(s.id) as total
@@ -58,7 +53,7 @@ def get_dashboard():
     cursor.close()
     conn.close()
 
-    total = taxas[3] or 1
+    total = taxas[5] or 1
 
     return {
         "totais": {
@@ -71,10 +66,13 @@ def get_dashboard():
             "aprovadas": taxas[0],
             "recusadas": taxas[1],
             "pendentes": taxas[2],
+            "retiradas": taxas[3],
+            "canceladas": taxas[4],
             "pct_aprovacao": round((taxas[0] / total) * 100, 1),
-            "pct_recusa": round((taxas[1] / total) * 100, 1)
+            "pct_recusa": round((taxas[1] / total) * 100, 1),
+            "pct_retirada": round((taxas[3] / total) * 100, 1),
+            "pct_cancelamento": round((taxas[4] / total) * 100, 1)
         },
-        "tempo_medio_horas": tempo_medio or 0,
         "top_produtos": [{"nome": r[0], "total": r[1]} for r in top_produtos],
         "top_usuarios": [{"nome": r[0], "total": r[1]} for r in top_usuarios]
     }

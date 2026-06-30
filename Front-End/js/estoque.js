@@ -11,8 +11,9 @@ let produtos = [];
 let viewAtual = 'grid';
 
 function getStatus(p) {
-    if (p.quantidade === 0) return "sem";
-    if (p.quantidade <= p.quantidade_minima) return "baixo";
+    const disp = (p.disponivel !== undefined) ? p.disponivel : p.quantidade;
+    if (disp <= 0) return "sem";
+    if (disp <= p.quantidade_minima) return "baixo";
     return "ok";
 }
 
@@ -57,7 +58,7 @@ function renderGrid() {
             <div class="produto-card-cat">${p.categoria} · ${p.lote}</div>
             <div class="produto-card-footer">
                 <div class="estoque-info">
-                    <strong>${p.quantidade} m</strong><br>em estoque
+                    <strong>${p.disponivel ?? p.quantidade} m</strong><br>disponível
                 </div>
                 <button class="btn-recusar" onclick="event.stopPropagation(); excluirProduto(${p.id})">✕</button>
             </div>
@@ -71,18 +72,21 @@ function renderLista() {
     const tbody = document.getElementById("tabelaLista");
 
     if (produtos.length === 0) {
-        tbody.innerHTML = `<tr class="empty-row"><td colspan="8">Nenhum produto cadastrado.</td></tr>`;
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="10">Nenhum produto cadastrado.</td></tr>`;
         return;
     }
 
     tbody.innerHTML = produtos.map(p => {
         const status = getStatus(p);
+        const disponivel = (p.disponivel !== undefined) ? p.disponivel : p.quantidade;
         return `
             <tr>
                 <td class="sku-cell">${p.sku}</td>
                 <td><strong>${p.nome}</strong></td>
                 <td>${p.categoria}</td>
                 <td>${p.quantidade} m</td>
+                <td>${p.reservado || 0} m</td>
+                <td>${disponivel} m</td>
                 <td>${p.quantidade_minima}</td>
                 <td>${p.lote}</td>
                 <td>
@@ -208,16 +212,26 @@ function abrirModal(idx) {
             </select>
         </div>
         <div class="modal-field">
-            <label>Quantidade</label>
-            <input type="number" class="input-base" id="editQuantidade" value="${p.quantidade}" min="0"/>
-        </div>
-        <div class="modal-field">
             <label>Quantidade Mínima</label>
             <input type="number" class="input-base" id="editQuantidadeMinima" value="${p.quantidade_minima}" min="0"/>
         </div>
         <div class="modal-field">
-            <label>Lote</label>
-            <input type="number" class="input-base" id="editLote" value="${p.lote}" min="0"/>
+            <label>Total em Estoque</label>
+            <input type="text" class="input-base" value="${p.quantidade} m" disabled style="opacity:0.7"/>
+        </div>
+        <div class="modal-field">
+            <label>Disponível</label>
+            <input type="text" class="input-base" value="${p.disponivel ?? p.quantidade} m" disabled style="opacity:0.7"/>
+        </div>
+        <div class="modal-field" style="grid-column:1/-1; border-top:1px solid var(--border); padding-top:12px; margin-top:8px;">
+            <label style="font-weight:700; color:var(--brown-dark);">Lotes do Produto</label>
+            <div id="lotesList" style="margin:8px 0;"></div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <input type="text" id="novoLoteCodigo" class="input-base" placeholder="Código do lote" style="flex:1; min-width:120px;"/>
+                <input type="number" id="novoLoteQtd" class="input-base" placeholder="Metragem" min="0" style="width:100px;"/>
+                <input type="date" id="novoLoteData" class="input-base" style="width:140px;"/>
+                <button class="btn-aprovar" onclick="adicionarLote(${p.id})" style="white-space:nowrap;">+ Novo Lote</button>
+            </div>
         </div>
         <div class="modal-field" style="grid-column: 1/-1">
             <label>Imagem</label>
@@ -236,9 +250,83 @@ function abrirModal(idx) {
         </div>
     `;
 
-    document.getElementById('btnConfirm').textContent = 'Salvar Alterações';
+    document.getElementById('btnConfirm').textContent = 'Salvar Produto';
     document.getElementById('btnConfirm').onclick = () => salvarEdicao(p.id);
     document.getElementById('overlay').classList.add('show');
+
+    carregarLotes(p.id);
+}
+
+async function carregarLotes(produto_id) {
+    try {
+        const res = await fetch(`${API}/produtos/${produto_id}/lotes`);
+        const lotes = await res.json();
+        document.getElementById("lotesList").innerHTML = lotes.length === 0
+            ? '<span style="color:var(--text-muted); font-size:0.8rem;">Nenhum lote cadastrado.</span>'
+            : lotes.map(l => `
+                <div style="display:flex; justify-content:space-between; align-items:center;
+                    padding:6px 8px; border:1px solid var(--border); border-radius:6px; margin-bottom:4px;
+                    font-size:0.8rem;">
+                    <span><strong>${l.codigo}</strong></span>
+                    <span>${l.quantidade} m</span>
+                    <span style="color:var(--text-muted);">Disp: ${l.disponivel} m</span>
+                    <span style="color:var(--text-muted);">${l.data_entrada || '—'}</span>
+                    ${l.disponivel === l.quantidade ? `
+                        <button class="btn-recusar" onclick="desativarLote(${l.id})" style="padding:2px 6px; font-size:0.65rem;">✕</button>
+                    ` : ''}
+                </div>
+            `).join("");
+    } catch (err) {
+        console.error("Erro ao carregar lotes:", err);
+    }
+}
+
+async function adicionarLote(produto_id) {
+    const codigo = document.getElementById("novoLoteCodigo").value.trim();
+    const quantidade = parseInt(document.getElementById("novoLoteQtd").value) || 0;
+    const data_entrada = document.getElementById("novoLoteData").value;
+
+    if (!codigo || quantidade <= 0) {
+        showToast("Informe código e metragem do lote.");
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API}/lotes`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ produto_id, codigo, quantidade, data_entrada: data_entrada || null })
+        });
+        const data = await res.json();
+        if (data.erro) {
+            showToast(data.erro);
+            return;
+        }
+        document.getElementById("novoLoteCodigo").value = "";
+        document.getElementById("novoLoteQtd").value = "";
+        document.getElementById("novoLoteData").value = "";
+        showToast("Lote adicionado!");
+        carregarLotes(produto_id);
+        carregarProdutos();
+    } catch (err) {
+        showToast("Erro ao criar lote.");
+    }
+}
+
+async function desativarLote(id) {
+    if (!confirm("Desativar este lote?")) return;
+    try {
+        await fetch(`${API}/lotes/${id}/desativar`, { method: "PATCH" });
+        showToast("Lote desativado!");
+        const editNome = document.getElementById('editNome');
+        if (editNome) {
+            const p = produtos.find(p => p.nome === editNome.value);
+            if (p) carregarLotes(p.id);
+        }
+        carregarProdutos();
+    } catch (err) {
+        showToast("Erro ao desativar lote.");
+    }
 }
 
 function previewImagemEdit(input) {
@@ -266,9 +354,7 @@ async function salvarEdicao(id) {
     const nome = document.getElementById('editNome').value.trim();
     const sku = document.getElementById('editSku').value.trim();
     const categoria = document.getElementById('editCategoria').value;
-    const quantidade = parseInt(document.getElementById('editQuantidade').value) || 0;
     const quantidade_minima = parseInt(document.getElementById('editQuantidadeMinima').value) || 0;
-    const lote = parseInt(document.getElementById('editLote').value) || 0;
     const editImgPreview = document.getElementById('editImgPreview');
     const imagem = editImgPreview.style.display !== 'none' ? editImgPreview.src : null;
 
@@ -281,7 +367,7 @@ async function salvarEdicao(id) {
         const resposta = await fetch(`${API}/produtos/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nome, sku, categoria, quantidade, quantidade_minima, lote, imagem })
+            body: JSON.stringify({ nome, sku, categoria, quantidade_minima, imagem })
         });
 
         if (!resposta.ok) throw new Error("Erro ao atualizar");

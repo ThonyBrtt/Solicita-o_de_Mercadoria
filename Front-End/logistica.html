@@ -131,11 +131,19 @@
         </div>
     </div>
 
-    <!-- Card Tempo médio -->
+    <!-- Card Retirada vs Cancelamento -->
     <div class="dash-card">
-        <div class="dash-card-title">Tempo Médio de Resposta</div>
-        <div class="dash-tempo" id="dTempo">—</div>
-        <div class="dash-tempo-label">horas entre pendente → resposta</div>
+        <div class="dash-card-title">Retirada vs Cancelamento</div>
+        <div class="dash-stats">
+            <div class="dash-stat retirado">
+                <div class="dash-stat-val" id="dRetiradas">—</div>
+                <div class="dash-stat-label">Retiradas</div>
+            </div>
+            <div class="dash-stat cancelado">
+                <div class="dash-stat-val" id="dCanceladas">—</div>
+                <div class="dash-stat-label">Canceladas</div>
+            </div>
+        </div>
     </div>
 
     <!-- Top Produtos -->
@@ -172,6 +180,15 @@
             <div class="kanban-cards" id="colAprovado"></div>
         </div>
 
+        <!-- RETIRADO -->
+        <div class="kanban-col">
+            <div class="kanban-col-header retirado">
+                <span>Retirado</span>
+                <span class="badge-count" id="count-retirado">0</span>
+            </div>
+            <div class="kanban-cards" id="colRetirado"></div>
+        </div>
+
         <!-- RECUSADO -->
         <div class="kanban-col">
             <div class="kanban-col-header recusado">
@@ -179,6 +196,15 @@
                 <span class="badge-count" id="count-recusado">0</span>
             </div>
             <div class="kanban-cards" id="colRecusado"></div>
+        </div>
+
+        <!-- CANCELADO -->
+        <div class="kanban-col">
+            <div class="kanban-col-header cancelado">
+                <span>Cancelado</span>
+                <span class="badge-count" id="count-cancelado">0</span>
+            </div>
+            <div class="kanban-cards" id="colCancelado"></div>
         </div>
 
     </div>

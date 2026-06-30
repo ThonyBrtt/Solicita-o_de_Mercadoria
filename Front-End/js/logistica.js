@@ -10,6 +10,7 @@ document.getElementById("avatarLetra").textContent = usuario.nome.charAt(0).toUp
 let solicitacoes = [];
 let produtos = [];
 let usuarios = [];
+let lotes = [];
 
 async function carregarSolicitacoes() {
     try {
@@ -23,8 +24,8 @@ async function carregarSolicitacoes() {
         produtos     = await resProd.json();
         usuarios     = await resUs.json();
 
-        console.log("Solicitações:", solicitacoes);
-        console.log("Primeiro status:", solicitacoes[0]?.status);
+        const resLotes = await fetch(`${API}/lotes`);
+        lotes = await resLotes.json();
 
         renderKanban();
     } catch (err) {
@@ -34,11 +35,19 @@ async function carregarSolicitacoes() {
     }
 }
 
+function getLoteCodigo(lote_id) {
+    if (!lote_id) return "—";
+    const lote = lotes.find(l => l.id === lote_id);
+    return lote ? lote.codigo : "—";
+}
+
 function renderKanban() {
     const colunas = {
         pendente:  document.getElementById("colPendente"),
         aprovado:  document.getElementById("colAprovado"),
-        recusado:  document.getElementById("colRecusado")
+        retirado:  document.getElementById("colRetirado"),
+        recusado:  document.getElementById("colRecusado"),
+        cancelado: document.getElementById("colCancelado")
     };
 
     // Limpa e zera contadores
@@ -69,7 +78,7 @@ function renderKanban() {
                 <span class="kanban-id">#${s.id}</span>
                 <span class="kanban-motivo">${s.motivo}</span>
             </div>
-            <div class="kanban-produto">${produto ? produto.nome : "Produto desconhecido"}</div>
+            <div class="kanban-produto">${produto ? `${produto.nome} <span style="font-size:0.72rem; font-weight:400; color:var(--text-muted);">· SKU - ${produto.sku}</span>` : "Produto desconhecido"}</div>
             <div class="kanban-solicitante">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -77,12 +86,19 @@ function renderKanban() {
                 </svg>
                 ${solicitante ? solicitante.nome : "Desconhecido"} · ${s.quantidade} un.
             </div>
+            <div class="kanban-lote">Lote: ${getLoteCodigo(s.lote_id)}</div>
             ${s.observacoes ? `<div class="kanban-obs">"${s.observacoes}"</div>` : ""}
             ${status === "pendente" ? `
             <div class="kanban-actions">
                 <button class="btn-aprovar" onclick="atualizarStatus(${s.id}, 'aprovado')">✔ Aprovar</button>
                 <button class="btn-recusar" onclick="atualizarStatus(${s.id}, 'recusado')">✘ Recusar</button>
+            </div>` : status === "aprovado" ? `
+            <div class="kanban-actions">
+                <button class="btn-aprovar" onclick="atualizarStatus(${s.id}, 'retirado')">📦 Confirmar Retirada</button>
+                <button class="btn-recusar" onclick="atualizarStatus(${s.id}, 'cancelado')">✕ Cancelar</button>
             </div>` : ""}
+            ${status === "retirado" ? `
+            <div class="kanban-obs" style="color: var(--success); font-weight: 600;">✓ Retirado</div>` : ""}
         `;
         col.appendChild(card);
     });
@@ -127,10 +143,8 @@ async function carregarDashboard() {
         document.getElementById("dAprovadas").textContent  = `${d.taxas.pct_aprovacao}%`;
         document.getElementById("dRecusadas").textContent  = `${d.taxas.pct_recusa}%`;
         document.getElementById("dPendentes").textContent  = d.taxas.pendentes;
-
-        // Tempo médio
-        document.getElementById("dTempo").textContent = d.tempo_medio_horas
-            ? `${d.tempo_medio_horas}h` : "—";
+        document.getElementById("dRetiradas").textContent  = `${d.taxas.pct_retirada}%`;
+        document.getElementById("dCanceladas").textContent = `${d.taxas.pct_cancelamento}%`;
 
         // Top produtos
         document.getElementById("topProdutos").innerHTML = d.top_produtos.map((p, i) => `

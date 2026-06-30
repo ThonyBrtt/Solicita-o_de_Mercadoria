@@ -546,6 +546,21 @@
 
 .btn-remover-img:hover { opacity: 0.7; }
 
+.btn-aprovar {
+    padding: 5px 12px;
+    background: var(--success);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.btn-aprovar:hover { opacity: 0.85; }
+
 .btn-recusar {
     padding: 5px 12px;
     background: var(--danger);

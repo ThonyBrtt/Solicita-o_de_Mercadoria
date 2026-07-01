@@ -10,6 +10,7 @@ document.getElementById("usuarioNome").textContent = usuario.nome;
 document.getElementById("perfilUsuario").textContent = usuario.perfil;
 document.getElementById("avatarLetra").textContent = usuario.nome.charAt(0).toUpperCase();
 document.getElementById("novoNome").value = usuario.nome;
+document.getElementById("novoEmail").value = usuario.email || '';
 
 async function alterarSenha() {
     const senhaAtual = document.getElementById("senhaAtual").value;
@@ -98,6 +99,46 @@ async function alterarNome() {
     document.getElementById("avatarLetra").textContent = novoNome.charAt(0).toUpperCase();
     showToast("Nome alterado com sucesso!");
     document.getElementById("senhaConfirmaNome").value = "";
+}
+
+async function alterarEmail() {
+    const novoEmail = document.getElementById("novoEmail").value.trim();
+    const senha = document.getElementById("senhaConfirmaEmail").value;
+
+    if (!novoEmail || !senha) {
+        showToast("Preencha todos os campos!", "erro");
+        return;
+    }
+
+    const respostaLogin = await fetch(`${API}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usuario: usuario.usuario, senha: senha })
+    });
+
+    const dadosLogin = await respostaLogin.json();
+
+    if (dadosLogin.erro) {
+        showToast("Senha incorreta!", "erro");
+        return;
+    }
+
+    await fetch(`${API}/usuarios/${usuario.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            nome: usuario.nome,
+            usuario: usuario.usuario,
+            senha: senha,
+            perfil: usuario.perfil,
+            email: novoEmail
+        })
+    });
+
+    usuario.email = novoEmail;
+    localStorage.setItem("usuario", JSON.stringify(usuario));
+    showToast("Email alterado com sucesso!");
+    document.getElementById("senhaConfirmaEmail").value = "";
 }
 
 function showToast(msg, tipo = "sucesso") {

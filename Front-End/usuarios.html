@@ -112,6 +112,10 @@
             </select>
           </div>
         </div>
+        <div style="margin-top:12px">
+          <label class="field-label">Email</label>
+          <input type="email" class="input-base" id="email" placeholder="email@exemplo.com" style="max-width:48%"/>
+        </div>
         <div class="actions-row" style="margin-top:16px">
           <button class="btn-enviar" onclick="cadastrarUsuario()">+ Cadastrar Usuário</button>
         </div>
@@ -133,6 +137,7 @@
               <th>#</th>
               <th>Nome</th>
               <th>Usuário</th>
+              <th>Email</th>
               <th>Perfil</th>
               <th style="width:160px">Alterar Perfil</th>
               <th style="width:60px"></th>
@@ -140,7 +145,7 @@
           </thead>
           <tbody id="tabelaUsuarios">
             <tr class="empty-row">
-              <td colspan="6">Carregando...</td>
+              <td colspan="7">Carregando...</td>
             </tr>
           </tbody>
         </table>

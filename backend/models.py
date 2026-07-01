@@ -9,7 +9,8 @@ def criar_tabelas():
                    nome VARCHAR(100) NOT NULL,
                    usuario VARCHAR(100) UNIQUE NOT NULL,
                    senha VARCHAR(100) NOT NULL,
-                   perfil VARCHAR(20) NOT NULL
+                   perfil VARCHAR(20) NOT NULL,
+                    email VARCHAR(255)
                    )""")
     
     cursor.execute("""CREATE TABLE IF NOT EXISTS produtos(
@@ -51,7 +52,7 @@ def criar_tabelas():
 
     cursor.execute("ALTER TABLE produtos ADD COLUMN IF NOT EXISTS reservado INTEGER NOT NULL DEFAULT 0")
     cursor.execute("ALTER TABLE solicitacoes ADD COLUMN IF NOT EXISTS lote_id INTEGER REFERENCES lotes(id)")
-
+    cursor.execute("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS email VARCHAR(255)")
     conn.commit()
     cursor.close()
     conn.close()

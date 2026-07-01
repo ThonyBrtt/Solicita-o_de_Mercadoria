@@ -24,7 +24,7 @@ async function carregarUsuarios() {
     if (usuarios.length === 0) {
         tbody.innerHTML = `
             <tr class="empty-row">
-                <td colspan="6">Nenhum usuário cadastrado.</td>
+                <td colspan="7">Nenhum usuário cadastrado.</td>
             </tr>`;
         return;
     }
@@ -34,10 +34,11 @@ async function carregarUsuarios() {
             <td class="sku-cell">#${u.id}</td>
             <td>${u.nome}</td>
             <td>${u.usuario}</td>
+            <td>${u.email || '—'}</td>
             <td>${u.perfil}</td>
             <td>
                 <select class="input-base" style="padding:4px 8px; font-size:0.8rem"
-                        onchange="alterarPerfil(${u.id}, this.value, '${u.nome}', '${u.usuario}', '${u.senha}')">
+                        onchange="alterarPerfil(${u.id}, this.value, '${u.nome}', '${u.usuario}', '${u.email}', '${u.senha}')">
                     <option value="vendas" ${u.perfil === 'vendas' ? 'selected' : ''}>Vendas</option>
                     <option value="logistica" ${u.perfil === 'logistica' ? 'selected' : ''}>Logística</option>
                 </select>
@@ -54,6 +55,7 @@ async function cadastrarUsuario() {
     const user   = document.getElementById("usuario").value.trim();
     const senha  = document.getElementById("senha").value;
     const perfil = document.getElementById("perfil").value;
+    const email  = document.getElementById("email").value.trim();
 
     if (!nome || !user || !senha || !perfil) {
         showToast("Preencha todos os campos!", "erro");
@@ -63,7 +65,7 @@ async function cadastrarUsuario() {
     const resposta = await fetch(`${API}/usuarios`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome, usuario: user, senha, perfil })
+        body: JSON.stringify({ nome, usuario: user, senha, perfil, email })
     });
 
     const dados = await resposta.json();
@@ -75,11 +77,14 @@ async function cadastrarUsuario() {
     carregarUsuarios();
 }
 
-async function alterarPerfil(id, perfil, nome, user, senha) {
+async function alterarPerfil(id, perfil, nome, user, email) {
+    const senha = prompt("Digite a senha do usuário para alterar o perfil:");
+    if (!senha) return;
+
     await fetch(`${API}/usuarios/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome, usuario: user, senha, perfil })
+        body: JSON.stringify({ nome, usuario: user, senha, perfil, email: email || '' })
     });
 
     showToast("Perfil atualizado!");

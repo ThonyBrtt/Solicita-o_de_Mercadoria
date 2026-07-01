@@ -36,6 +36,13 @@ function toggleSenha() {
 
     localStorage.setItem("usuario", JSON.stringify(dados));
 
+    const lembrar = document.getElementById("lembrar").checked;
+    if (lembrar) {
+        localStorage.setItem("rb_usuario", dados.usuario);
+    } else {
+        localStorage.removeItem("rb_usuario");
+    }
+
     if (dados.perfil === "proprietario") {
         window.location.href = "proprietario.html";
     } else if (dados.perfil === "logistica") {

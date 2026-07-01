@@ -16,6 +16,7 @@ class UsuarioEntrada(BaseModel):
     usuario: str
     senha: str
     perfil: PerfilUsuario
+    email: str
 
 class LoginEntrada(BaseModel):
     usuario: str
@@ -25,7 +26,7 @@ class LoginEntrada(BaseModel):
 def listar_usuarios():
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, nome, usuario, perfil FROM usuarios")
+    cursor.execute("SELECT id, nome, usuario, perfil, email FROM usuarios")
     usuarios = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -34,7 +35,8 @@ def listar_usuarios():
             "id": u[0],
             "nome": u[1],
             "usuario": u[2],
-            "perfil": u[3]
+            "perfil": u[3],
+            "email": u[4]
         }
         for u in usuarios
     ]
@@ -45,12 +47,13 @@ def criar_usuario(usuario: UsuarioEntrada):
     conn = get_conn()
     cursor = conn.cursor()
     senha_hash = hash_senha(usuario.senha)
-    cursor.execute("""INSERT INTO usuarios (nome, usuario, senha, perfil) 
-                   VALUES (%s, %s, %s, %s) RETURNING id""",(
+    cursor.execute("""INSERT INTO usuarios (nome, usuario, senha, perfil, email) 
+                   VALUES (%s, %s, %s, %s, %s) RETURNING id""",(
                        usuario.nome,
                        usuario.usuario,
                        senha_hash,
-                       usuario.perfil
+                       usuario.perfil,
+                       usuario.email
                    ))
     novo_id = cursor.fetchone()[0]
     conn.commit()
@@ -71,11 +74,12 @@ def atualizar_usuario(id: int, usuario: UsuarioEntrada):
         return {"Mensagem": "Usuário Não encontrado"}
     
     senha_hash = hash_senha(usuario.senha)
-    cursor.execute("UPDATE usuarios SET nome = %s, usuario = %s, senha = %s, perfil = %s WHERE id = %s", (
+    cursor.execute("UPDATE usuarios SET nome = %s, usuario = %s, senha = %s, perfil = %s, email = %s WHERE id = %s", (
         usuario.nome,
         usuario.usuario,
         senha_hash,
         usuario.perfil,
+        usuario.email,
         id
     ))
     conn.commit()
@@ -90,12 +94,12 @@ def login(dados: LoginEntrada):
     cursor = conn.cursor()
     
     cursor.execute(
-        "SELECT id, nome, usuario, perfil, senha FROM usuarios WHERE usuario = %s",
+        "SELECT id, nome, usuario, perfil, email, senha FROM usuarios WHERE usuario = %s",
         (dados.usuario,)
     )
     usuario = cursor.fetchone()
     
-    if not usuario or not verificar_senha(dados.senha, usuario[4]):
+    if not usuario or not verificar_senha(dados.senha, usuario[5]):
         cursor.close()
         conn.close()
         return {"erro": "Usuário ou senha incorretos"}
@@ -107,7 +111,8 @@ def login(dados: LoginEntrada):
         "id": usuario[0],
         "nome": usuario[1],
         "usuario": usuario[2],
-        "perfil": usuario[3]
+        "perfil": usuario[3],
+        "email": usuario[4]
     }
 
 @router.delete("/usuarios/{id}")
